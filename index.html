@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="my" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>NOVANEX AI Recap - Next Gen AI Engine</title>
+    
+    <!-- Tailwind CSS & Inter/Caveat/Noto Sans Myanmar Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Myanmar:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans Myanmar', 'sans-serif'],
+                        handwritten: ['Caveat', 'cursive'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #030303;
+            color: #ffffff;
+            font-family: 'Inter', 'Noto Sans Myanmar', sans-serif;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        /* Ambient Glow Backgrounds */
+        .ambient-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(140px);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.15;
+            transition: all 0.8s ease;
+        }
+
+        /* Native-like Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Smooth Frame/Screen Slide Animations */
+        .page-view {
+            transition: opacity 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .page-hidden {
+            opacity: 0;
+            transform: scale(0.97) translateY(12px);
+            pointer-events: none;
+            display: none !important;
+        }
+        .page-active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            display: block;
+        }
+
+        /* Glassmorphism Navigation & Controls */
+        .glass-nav {
+            background: rgba(10, 10, 10, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .glass-card {
+            background: rgba(15, 15, 15, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* Pulse animation for premium vibe */
+        @keyframes pulse-border {
+            0%, 100% { border-color: rgba(168, 85, 247, 0.3); }
+            50% { border-color: rgba(59, 130, 246, 0.6); }
+        }
+        .active-premium-border {
+            animation: pulse-border 4s infinite;
+        }
+
+        /* Pull-to-refresh style loading */
+        .ptr-spinner {
+            transition: transform 0.2s, opacity 0.2s;
+        }
+    </style>
+</head>
+<body class="min-h-screen relative flex flex-col justify-between pb-24 md:pb-6">
+
+    <!-- OS Ambient background lights -->
+    <div id="glow-1" class="ambient-glow top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-600"></div>
+    <div id="glow-2" class="ambient-glow bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-blue-600"></div>
+
+    <!-- MAIN OS SHELL WINDOW CONTAINER -->
+    <div class="w-full max-w-5xl mx-auto px-0 md:px-4 py-0 md:py-8 flex-grow z-10 flex flex-col">
+        
+        <!-- Premium Native App Shell (Header/Traffic lights for Desktop View) -->
+        <div class="hidden md:flex items-center justify-between px-6 py-3.5 bg-neutral-950/80 border-t border-l border-r border-neutral-800/80 rounded-t-3xl backdrop-blur-xl">
+            <!-- Traffic Lights -->
+            <div class="flex items-center gap-2">
+                <span class="w-3.5 h-3.5 rounded-full bg-red-500/80 hover:bg-red-500 cursor-pointer transition-colors shadow-lg"></span>
+                <span class="w-3.5 h-3.5 rounded-full bg-yellow-500/80 hover:bg-yellow-500 cursor-pointer transition-colors shadow-lg"></span>
+                <span class="w-3.5 h-3.5 rounded-full bg-green-500/80 hover:bg-green-500 cursor-pointer transition-colors shadow-lg"></span>
+                <span class="text-[11px] text-neutral-500 font-semibold uppercase tracking-widest ml-4 font-sans">Novanex Desktop Shell</span>
+            </div>
+            <!-- Dynamic State Info -->
+            <div class="flex items-center gap-3">
+                <span id="desktop-engine-status" class="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 border border-white/5 rounded-full text-[10px] text-neutral-400">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Systems Operational</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- APP BODY VIEWPORTS -->
+        <div class="bg-neutral-950/40 md:bg-neutral-950/70 border-b md:border border-neutral-900 md:rounded-b-3xl md:shadow-2xl flex-grow px-4 md:px-8 py-6 backdrop-blur-3xl flex flex-col relative overflow-hidden">
+            
+            <!-- Toast System inside the App Shell -->
+            <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 z-50 transform -translate-y-20 opacity-0 transition-all duration-300 pointer-events-none w-[90%] max-w-md">
+                <div class="flex items-center gap-3 bg-neutral-900/90 border border-neutral-800 text-white px-5 py-4 rounded-2xl shadow-2xl backdrop-blur-xl">
+                    <div id="toast-icon" class="text-emerald-400">
+                        <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                    </div>
+                    <p id="toast-message" class="text-xs font-semibold text-neutral-200">အောင်မြင်ပါသည်။</p>
+                </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- VIEW 1: HOME SCREEN -->
+            <!-- ============================================== -->
+            <div id="view-home" class="page-view page-active space-y-10">
+                
+                <!-- Home Native Bar Header -->
+                <header class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <span class="px-3 py-1 bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 rounded-full text-[10px] text-purple-400 font-extrabold tracking-widest uppercase">NV-PRO V5.1.0</span>
+                    </div>
+                    
+                    <!-- Sound Toggle Switch (Premium Feature) -->
+                    <button onclick="toggleAudioEffect()" id="btn-sound" class="flex items-center gap-1.5 bg-neutral-900/60 border border-neutral-800/80 px-3 py-1.5 rounded-full text-xs text-neutral-400 hover:text-white transition-all">
+                        <i data-lucide="volume-2" id="sound-icon" class="w-3.5 h-3.5 text-purple-400"></i>
+                        <span id="sound-label">Haptic Sounds: On</span>
+                    </button>
+                </header>
+
+                <!-- Brand Hero Center -->
+                <div class="text-center py-4 flex flex-col items-center justify-center space-y-4">
+                    <div class="relative group">
+                        <div class="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-30 blur-2xl group-hover:opacity-55 transition duration-1000"></div>
+                        <img src="https://i.ibb.co/GGFXB2K/file-00000000923c7208b994f09e61a7164b.png" alt="NOVANEX Logo" class="relative w-24 h-24 object-contain rounded-full border border-white/10 p-1 bg-black/80 shadow-2xl transition-transform duration-500 hover:scale-105" onerror="this.src='https://placehold.co/150x150/09090b/ffffff?text=N'">
+                    </div>
+                    
+                    <div class="space-y-1">
+                        <h1 class="text-2xl md:text-4xl font-black tracking-tight bg-gradient-to-b from-white to-neutral-500 bg-clip-text text-transparent">NOVANEX AI RECAP</h1>
+                        <p class="text-[10px] md:text-xs font-black tracking-[0.3em] text-purple-400 uppercase font-sans">Next Gen Engine Studio</p>
+                    </div>
+                    <p class="text-neutral-500 max-w-sm mx-auto text-[11px] md:text-xs font-light leading-relaxed">
+                        အလိုအလျောက် ဗီဒီယိုအကျဉ်းချုပ်၊ စာတန်းထိုးနှင့် အသံစနစ်များဖန်တီးပေးမည့် ကမ္ဘာ့အဆင့်မီ မြန်မာနိုင်ငံသုံး AI Application။
+                    </p>
+                </div>
+
+                <!-- Interactive App Grid -->
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center border-b border-neutral-900 pb-2">
+                        <h3 class="text-[10px] font-bold tracking-widest uppercase text-neutral-400">စွမ်းဆောင်ရည်မြင့် AI Tools များ</h3>
+                        <span class="text-[10px] text-neutral-600 uppercase">Interactive Tiles</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="tools-grid">
+                        <!-- Populated inside JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Welcome Promo Board -->
+                <div class="p-6 rounded-3xl bg-gradient-to-r from-neutral-950 to-neutral-900 border border-neutral-900 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-purple-600/5 rounded-full blur-[60px]"></div>
+                    <div class="space-y-1.5 z-10 text-center md:text-left">
+                        <span class="text-[10px] font-bold text-purple-400 uppercase tracking-widest">တကယ့် Live AI Engine နှင့်ချိတ်ဆက်ရန်</span>
+                        <h4 class="text-sm font-bold text-white">သင့်ကိုယ်ပိုင် Gemini Key ရှိပါသလား။</h4>
+                        <p class="text-neutral-500 text-[11px] max-w-md leading-relaxed">Settings တွင် API Key ကိုထည့်သွင်း၍ Demo ကန့်သတ်ချက်များမရှိဘဲ တကယ့် Live Engine ဖြင့် အမြန်ဆုံး အသုံးပြုနိုင်ပါသည်။</p>
+                    </div>
+                    <button onclick="navigateTo('view-settings')" class="z-10 shrink-0 px-5 py-3 bg-white hover:bg-neutral-200 text-black rounded-2xl text-xs font-bold transition-all hover:scale-105 active:scale-95">
+                        Gemini Key ထည့်သွင်းရန်
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- ============================================== -->
+            <!-- VIEW 2: SAVED LIBRARY (HISTORY) - NEW FEATURE -->
+            <!-- ============================================== -->
+            <div id="view-history" class="page-view page-hidden space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-lg font-bold">စာကြည့်တိုက်နှင့် မှတ်တမ်းစု</h2>
+                        <p class="text-[11px] text-neutral-500">ယခင်ပြုလုပ်ခဲ့သော ဖန်တီးမှုများကို ပြန်လည်ကြည့်ရှု ဒေါင်းလုဒ်လုပ်ရန်</p>
+                    </div>
+                    <button onclick="clearAllHistory()" class="px-3.5 py-1.5 bg-red-950/20 border border-red-900/30 hover:bg-red-900/20 text-red-400 rounded-xl text-[10px] font-bold transition-all hover:scale-105 active:scale-95">
+                        မှတ်တမ်းအားလုံးဖျက်မည်
+                    </button>
+                </div>
+
+                <!-- Saved List container -->
+                <div id="history-list-container" class="space-y-4 min-h-[300px]">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- VIEW 3: SETTINGS SCREEN -->
+            <!-- ============================================== -->
+            <div id="view-settings" class="page-view page-hidden space-y-8">
+                <div>
+                    <h2 class="text-lg font-bold">App Settings</h2>
+                    <p class="text-[11px] text-neutral-500">စနစ်သုံး ဆက်တင်များနှင့် API များကို စီမံခန့်ခွဲရန်</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Brand info card -->
+                    <div class="p-6 rounded-3xl bg-neutral-950/60 border border-neutral-900 space-y-4 flex flex-col items-center text-center justify-center">
+                        <img src="https://i.ibb.co/GGFXB2K/file-00000000923c7208b994f09e61a7164b.png" alt="NOVANEX AI" class="w-16 h-16 object-contain rounded-full border border-neutral-800 p-1 bg-black">
+                        <div>
+                            <h3 class="font-extrabold text-white text-base">NOVANEX AI</h3>
+                            <p class="text-[9px] text-purple-400 font-bold uppercase tracking-widest">Next Gen AI Engine</p>
+                        </div>
+                        <p class="text-[11px] text-neutral-400 leading-relaxed">နောက်ဆုံးပေါ် AI Algorithms များကို အသုံးပြု၍ စာသား၊ အသံနှင့် ဗီဒီယိုများကို အကောင်းဆုံး ပြန်လည်ပြုပြင်ဖန်တီးပေးသည်။</p>
+                    </div>
+
+                    <!-- API key setup card -->
+                    <div class="md:col-span-2 p-6 rounded-3xl bg-neutral-950/60 border border-neutral-900 space-y-5">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-purple-500/10 rounded-xl text-purple-400">
+                                <i data-lucide="key" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-white">Gemini API Configuration</h3>
+                                <p class="text-[11px] text-neutral-500">ပိုမိုမြန်ဆန်ပြီး ကန့်သတ်ချက်မဲ့ အသုံးပြုရန် ကိုယ်ပိုင် API Key ထည့်ပါ</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="relative">
+                                <input type="password" id="api-key-input" placeholder="AIzaSy..." class="w-full bg-neutral-900 border border-neutral-800/80 rounded-2xl px-4 py-3 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all font-mono">
+                                <button onclick="toggleKeyVisibility()" class="absolute right-4 top-3 text-neutral-500 hover:text-white transition-colors">
+                                    <i data-lucide="eye" id="eye-icon" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <button onclick="saveApiKey()" class="flex-grow py-3 bg-purple-600 hover:bg-purple-500 active:scale-95 text-white rounded-2xl text-xs font-semibold tracking-wider transition-all shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+                                    Save Configuration
+                                </button>
+                                <button onclick="clearApiKey()" class="px-4 bg-neutral-900 hover:bg-red-950/40 border border-neutral-800 hover:border-red-900/40 text-neutral-400 hover:text-red-400 rounded-2xl transition-all active:scale-95" title="Clear Key">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+
+                            <div class="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 text-[10px] text-amber-300 space-y-1">
+                                <span class="font-bold uppercase tracking-wider block">⚠️ လုံခြုံရေး အသိပေးချက် -</span>
+                                <p class="leading-relaxed">သင်၏ API Key သည် သင့်ကိုယ်ပိုင် Browser local storage ထဲတွင်သာ လုံခြုံစွာ သိမ်းဆည်းထားမည်ဖြစ်ပြီး ကျွန်ုပ်တို့ထံသို့ လုံးဝပေးပို့မည်မဟုတ်ပါ။ သော့မရှိပါက Demo စနစ်ဖြင့်သာ လည်ပတ်မည်ဖြစ်သည်။</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System specs details -->
+                <div class="p-6 rounded-3xl bg-neutral-950/40 border border-neutral-900/60">
+                    <h3 class="text-xs font-bold text-neutral-300 mb-4 uppercase tracking-widest">စနစ်ဆိုင်ရာ အချက်အလက်များ</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="p-4 rounded-2xl bg-neutral-900/40 border border-neutral-800/60">
+                            <span class="text-[9px] uppercase tracking-widest text-neutral-500">Version</span>
+                            <p class="text-xs font-bold text-white mt-1">v5.1.0 Pro</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-neutral-900/40 border border-neutral-800/60">
+                            <span class="text-[9px] uppercase tracking-widest text-neutral-500">Build Date</span>
+                            <p class="text-xs font-bold text-white mt-1">April 2026</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-neutral-900/40 border border-neutral-800/60">
+                            <span class="text-[9px] uppercase tracking-widest text-neutral-500">Engine</span>
+                            <p class="text-xs font-bold text-purple-400 mt-1">Gemini 3-Flash</p>
+                        </div>
+                        <div class="p-4 rounded-2xl bg-neutral-900/40 border border-neutral-800/60">
+                            <span class="text-[9px] uppercase tracking-widest text-neutral-500">Region</span>
+                            <p class="text-xs font-bold text-white mt-1">Global / MM</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GitHub and official links -->
+                <div class="flex justify-center gap-6 text-xs text-neutral-400">
+                    <a href="https://github.com/ChitLay118/NOVANEX-AI-Recap.git" target="_blank" class="hover:text-white flex items-center gap-1.5 transition-colors">
+                        <i data-lucide="github" class="w-4 h-4"></i> GitHub Repository
+                    </a>
+                    <span class="text-neutral-800">|</span>
+                    <a href="https://novanex-ai-recap.vercel.app/" target="_blank" class="hover:text-white flex items-center gap-1.5 transition-colors">
+                        <i data-lucide="globe" class="w-4 h-4"></i> Live Website
+                    </a>
+                </div>
+            </div>
+
+            <!-- ============================================== -->
+            <!-- VIEW 4: DYNAMIC TOOL VIEWS -->
+            <!-- ============================================== -->
+            <div id="view-tool" class="page-view page-hidden space-y-6">
+                <!-- Tool Header with dynamic title -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <button onclick="navigateTo('view-home')" class="p-2.5 bg-neutral-900/60 border border-neutral-800 rounded-2xl text-neutral-300 hover:text-white hover:bg-neutral-800 transition-all active:scale-90">
+                            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                        </button>
+                        <div>
+                            <h2 id="tool-view-title" class="text-lg font-bold text-white">TOOL TITLE</h2>
+                            <span id="tool-view-badge" class="hidden px-2 py-0.5 bg-purple-500/20 text-purple-400 border border-purple-500/30 text-[9px] font-bold rounded uppercase tracking-wider">PRO</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Status pill -->
+                    <div id="engine-status" class="flex items-center gap-2 px-3.5 py-1.5 bg-neutral-900/60 border border-neutral-800 rounded-2xl text-xs text-neutral-400">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                        <span id="status-text">Demo Mode</span>
+                    </div>
+                </div>
+
+                <!-- TOOL VIEWS CONTAINER -->
+                <div class="w-full">
+                    
+                    <!-- [A] VIDEO RECAP NV TOOL -->
+                    <div id="tool-container-video_recap" class="tool-ui-section hidden space-y-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                            <!-- Controls panel -->
+                            <div class="lg:col-span-5 space-y-5">
+                                <div class="p-6 rounded-3xl bg-neutral-950/60 border border-neutral-900 space-y-5">
+                                    <h3 class="font-bold text-xs text-neutral-300">ဗီဒီယို ထည့်သွင်းနည်းလမ်း</h3>
+                                    
+                                    <!-- Tab Selection -->
+                                    <div class="flex p-1 bg-neutral-900 rounded-2xl border border-neutral-800">
+                                        <button onclick="setRecapMethod('file')" id="btn-recap-file" class="flex-1 py-2.5 text-xs font-semibold rounded-xl bg-purple-600 text-white transition-all">
+                                            UPLOAD FILE
+                                        </button>
+                                        <button onclick="setRecapMethod('link')" id="btn-recap-link" class="flex-1 py-2.5 text-xs font-semibold rounded-xl text-neutral-400 hover:text-white transition-all">
+                                            VIDEO LINK
+                                        </button>
+                                    </div>
+
+                                    <!-- File Input Container -->
+                                    <div id="recap-file-input" class="space-y-2">
+                                        <label class="block text-[11px] text-neutral-400">ဗီဒီယိုဖိုင် ရွေးချယ်ပါ</label>
+                                        <div class="border-2 border-dashed border-neutral-800 hover:border-purple-500/50 bg-neutral-900/40 rounded-2xl p-6 text-center cursor-pointer transition-all relative">
+                                            <input type="file" id="recap-file" accept="video/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleRecapFileSelect(this)">
+                                            <i data-lucide="video" class="w-8 h-8 text-neutral-600 mx-auto mb-3"></i>
+                                            <p id="recap-file-name" class="text-xs text-neutral-400 font-medium">ဗီဒီယို ဆွဲထည့်ပါ သို့မဟုတ် ရွေးချယ်ပါ</p>
+                                            <span class="text-[10px] text-neutral-600 block mt-1">MP4, MKV, MOV up to 100MB</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Link Input Container -->
+                                    <div id="recap-link-input" class="space-y-2 hidden">
+                                        <label class="block text-[11px] text-neutral-400">ဗီဒီယို URL Link ထည့်သွင်းပါ</label>
+                                        <input type="url" id="recap-url" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-neutral-900 border border-neutral-800 rounded-2xl px-4 py-3 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-purple-500 transition-all">
+                                    </div>
+
+                                    <!-- Audio Mastering Options -->
+                                    <div class="space-y-3">
+                                        <label class="block text-xs font-semibold text-neutral-400">Audio Mastering Options</label>
+                                        <div class="grid grid-cols-3 gap-2">
+                                            <button onclick="setMastering('vocal')" id="m-vocal" class="p-3 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-2xl text-center transition-all group">
+                                                <i data-lucide="mic-off" class="w-4 h-4 mx-auto text-neutral-500 group-hover:text-purple-400 mb-1"></i>
+                                                <span class="text-[10px] font-bold text-neutral-400 block">Vocal Cut</span>
+                                            </button>
+                                            <button onclick="setMastering('background')" id="m-background" class="p-3 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-2xl text-center transition-all group">
+                                                <i data-lucide="music" class="w-4 h-4 mx-auto text-neutral-500 group-hover:text-purple-400 mb-1"></i>
+                                                <span class="text-[10px] font-bold text-neutral-400 block">Background</span>
+                                            </button>
+                                            <button onclick="setMastering('balanced')" id="m-balanced" class="p-3 bg-purple-500/10 border border-purple-500/30 rounded-2xl text-center transition-all group">
+                                                <i data-lucide="activity" class="w-4 h-4 mx-auto text-purple-400 mb-1"></i>
+                                                <span class="text-[10px] font-bold text-purple-400 block">Balanced</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Button -->
+                                    <button onclick="generateRecap()" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(168,85,247,0.25)] active:scale-95 flex items-center justify-center gap-2">
+                                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                        <span>Generate AI Recap</span>
+                                    </button>
+                                </div>
+
+                                <!-- How to use guide -->
+                                <div class="p-5 rounded-3xl bg-neutral-950/30 border border-neutral-900/60 space-y-2">
+                                    <h4 class="text-xs font-bold text-neutral-400 uppercase tracking-widest">အသုံးပြုနည်းလမ်း</h4>
+                                    <ul class="text-[11px] text-neutral-500 space-y-2 list-decimal list-inside leading-relaxed">
+                                        <li>ဗီဒီယိုဖိုင် တင်ပါ သို့မဟုတ် ဗီဒီယိုလင့်ခ်တစ်ခု ထည့်သွင်းပါ။</li>
+                                        <li>Audio Mastering Style ကို စိတ်ကြိုက်ရွေးချယ်ပါ။</li>
+                                        <li>Generate AI Recap ကိုနှိပ်ပြီး AI က အကျဉ်းချုပ်ပြုလုပ်ပေးမည့်အချိန်ကို ခေတ္တစောင့်ဆိုင်းပါ။</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Output Panel -->
+                            <div class="lg:col-span-7">
+                                <div class="h-full min-h-[400px] flex flex-col p-6 rounded-3xl bg-neutral-950/60 border border-neutral-900">
+                                    <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
+                                        <div class="flex items-center gap-2">
+                                            <i data-lucide="file-text" class="w-4 h-4 text-purple-400"></i>
+                                            <h3 class="font-bold text-sm text-neutral-200">Burmese Recap Script</h3>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button onclick="shareContent('recap-output-content')" class="p-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-colors" title="Share">
+                                                <i data-lucide="share-2" class="w-4 h-4"></i>
+                                            </button>
+                                            <button onclick="copyOutputText('recap-output-content')" class="p-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-colors" title="Copy">
+                                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Output States -->
+                                    <div id="recap-output-placeholder" class="flex-grow flex flex-col items-center justify-center text-center p-8 space-y-4">
+                                        <div class="w-16 h-16 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-600">
+                                            <i data-lucide="terminal" class="w-8 h-8"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-neutral-400 font-semibold">ရလဒ် စောင့်ဆိုင်းနေပါသည်</p>
+                                            <p class="text-[11px] text-neutral-500 mt-1 max-w-xs">ဘယ်ဘက်တွင် လိုအပ်ချက်များထည့်သွင်း၍ AI Recap ထုတ်ယူပါ</p>
+                                        </div>
+                                    </div>
+
+                                    <div id="recap-output-loader" class="hidden flex-grow flex-col items-center justify-center text-center p-8 space-y-4">
+                                        <div class="w-12 h-12 rounded-full border-4 border-purple-500/10 border-t-purple-600 animate-spin"></div>
+                                        <div>
+                                            <p class="text-xs text-purple-400 font-semibold">AI က ဗီဒီယိုအား ဖတ်ရှုတွက်ချက်နေပါသည်</p>
+                                            <p class="text-[10px] text-neutral-500 mt-1">ခဏတာ စောင့်ဆိုင်းပေးပါ...</p>
+                                        </div>
+                                    </div>
+
+                                    <div id="recap-output-content" class="hidden flex-grow overflow-y-auto text-sm text-neutral-300 space-y-4 leading-relaxed font-sans select-text">
+                                        <!-- Rendered Output -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- [B] VIDEO TO MY SUB.SRT TOOL -->
+                    <div id="tool-container-transcribe" class="tool-ui-section hidden space-y-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                            <div class="lg:col-span-5 space-y-5">
+                                <div class="p-6 rounded-3xl bg-neutral-950/60 border border-neutral-900 space-y-5">
+                                    <h3 class="font-bold text-xs text-neutral-300">အသံ/ဗီဒီယိုမှ စာတန်းထိုးထုတ်ခြင်း</h3>
+
+                                    <!-- Filename -->
+                                    <div class="space-y-1.5">
+                                        <label class="block text-[11px] text-neutral-400">ဖိုင်အမည် သတ်မှတ်ရန်</label>
+                                        <div class="flex">
+                                            <input type="text" id="srt-filename" value="novanex_subtitle" class="w-full bg-neutral-900 border border-neutral-800 rounded-l-2xl px-4 py-3 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-purple-500">
+                                            <span class="bg-neutral-800 border-t border-b border-r border-neutral-800 text-neutral-400 px-4 py-3 text-xs rounded-r-2xl flex items-center">.srt</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Drag & Drop File -->
+                                    <div class="space-y-2">
+                                        <label class="block text-[11px] text-neutral-400">ဖိုင်ရွေးချယ်ရန်</label>
+                                        <div class="border-2 border-dashed border-neutral-800 hover:border-blue-500/50 bg-neutral-900/40 rounded-2xl p-6 text-center cursor-pointer transition-all relative">
+                                            <input type="file" id="srt-file" accept="video/*,audio/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleSrtFileSelect(this)">
+                                            <i data-lucide="file-video-2" class="w-8 h-8 text-neutral-600 mx-auto mb-3"></i>
+                                            <p id="srt-file-name" class="text-xs text-neutral-400 font-medium">ဗီဒီယို သို့မဟုတ် အော်ဒီယိုဖိုင် ရွေးပါ</p>
+                                            <span class="text-[10px] text-neutral-600 block mt-1">MP4, MP3, WAV up to 100MB</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Button -->
+                                    <button onclick="generateSrtSubtitles()" class="w-full py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(59,130,246,0.25)] active:scale-95 flex items-center justify-center gap-2">
+                                        <i data-lucide="subtitles" class="w-4 h-4"></i>
+                                        <span>AI ဖြင့် စာသားထုတ်မည်</span>
+                                    </button>
+                                </div>
+
+                                <!-- Statistics panel -->
+                                <div class="p-6 rounded-3xl bg-neutral-950/40 border border-neutral-900/60 grid grid-cols-2 gap-4">
+                                    <div class="p-3 bg-neutral-900/40 border border-neutral-800 rounded-2xl">
+                                        <span class="text-[10px] text-neutral-500 uppercase font-semibold">Blocks (စာလုံးတွဲ)</span>
+                                        <p id="srt-stats-blocks" class="text-lg font-black text-white mt-1">0</p>
+                                    </div>
+                                    <div class="p-3 bg-neutral-900/40 border border-neutral-800 rounded-2xl">
+                                        <span class="text-[10px] text-neutral-500 uppercase font-semibold">Total Lines (လိုင်းစုစုပေါင်း)</span>
+                                        <p id="srt-stats-lines" class="text-lg font-black text-white mt-1">0</p>
+                                    </div>
+                                    <div class="col-span-2 p-3 bg-neutral-900/40 border border-neutral-800 rounded-2xl flex items-center justify-between">
+                                        <span class="text-[10px] text-neutral-500 uppercase font-semibold">Engine</span>
+                                        <span class="text-xs font-bold text-blue-400">Gemini 3 Flash Pro</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Subtitles space editor -->
+                            <div class="lg:col-span-7">
+                                <div class="h-full min-h-[450px] flex flex-col p-6 rounded-3xl bg-neutral-950/60 border border-neutral-900">
+                                    <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
+                                        <div class="flex items-center gap-2">
+                                            <i data-lucide="align-left" class="w-4 h-4 text-blue-400"></i>
+                                            <h3 class="font-bold text-sm text-neutral-200">SRT Subtitle Editor</h3>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button onclick="shareContent('srt-textarea')" class="p-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-colors" title="Share Subtitles">
+                                                <i data-lucide="share-2" class="w-4 h-4"></i>
+                                            </button>
+                                            <button onclick="copyOutputText('srt-textarea')" class="p-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-colors" title="Copy Subtitles">
+                                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                            </button>
+                                            <button onclick="downloadSrtFile()" class="p-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-colors" title="Download File">
+                                                <i data-lucide="download" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- SRT States -->
+                                    <div id="srt-output-placeholder" class="flex-grow flex flex-col items-center justify-center text-center p-8 space-y-4">
+                                        <div class="w-16 h-16 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-600">
+                                            <i data-lucide="file-output" class="w-8 h-8"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-neutral-400 font-semibold">SRT ဖိုင် အသင့်မဖြစ်သေးပါ</p>
+                                            <p class="text-[11px] text-neutral-500 mt-1 max-w-xs">ဘယ်ဘက်တွင် ဖိုင်တင်ပြီး AI စာတန်းထိုး ပြုလုပ်ပါ</p>
+                                        </div>
+                                    </div>
+
+                                    <div id="srt-output-loader" class="hidden flex-grow flex-col items-center justify-center text-center p-8 space-y-4">
+                                        <div class="w-12 h-12 rounded-full border-4 border-blue-500/10 border-t-blue-600 animate-spin"></div>
+                                        <div>
+                                            <p class="text-xs text-blue-400 font-semibold">AI က အသံများကို စာသားအဖြစ် ပြောင်းလဲနေပါသည်</p>
+                                            <p class="text-[10px] text-neutral-500 mt-1">ကျေးဇူးပြု၍ စက္ကန့်အနည်းငယ် စောင့်ပါ...</p>
+                                        </div>
+                                    </div>
+
+                                    <textarea id="srt-textarea" class="hidden flex-grow w-full h-[320px] bg-neutral-900/60 border border-neutral-800 rounded-2xl p-4 text-xs font-mono text-neutral-300 focus:outline-none focus:border-blue-500/50 resize-none" oninput="updateSrtStats()"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- [C] GENERIC TOOL VIEW (STORY CREATOR, TRANSLATE, AI VOICE, CONTENT CREATION) -->
+                    <div id="tool-container-generic" class="tool-ui-section hidden space-y-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                            <!-- Input Control panel -->
+                            <div class="lg:col-span-5 space-y-5">
+                                <div class="p-6 rounded-3xl bg-neutral-950/60 border border-neutral-900 space-y-5">
+                                    <h3 id="generic-input-header" class="font-bold text-xs text-neutral-300">လုပ်ဆောင်ချက်</h3>
+
+                                    <!-- VOICE SPECIFIC OPTION FIELD -->
+                                    <div id="voice-options-container" class="space-y-3 hidden">
+                                        <label class="block text-[11px] text-neutral-400">အသံအမျိုးအစား ရွေးချယ်ရန်</label>
+                                        <select id="voice-character" class="w-full bg-neutral-900 border border-neutral-800 rounded-2xl px-4 py-3 text-xs text-white focus:outline-none focus:border-purple-500">
+                                            <option value="Kore" selected>Kore (အေးဆေးငြိမ်သက်သော အသံ)</option>
+                                            <option value="Zephyr">Zephyr (နွေးထွေးဖော်ရွေသော အသံ)</option>
+                                            <option value="Puck">Puck (ရွှင်ပျော်တက်ကြွသော အသံ)</option>
+                                            <option value="Fenrir">Fenrir (လေးနက်တည်ကြည်သော အသံ)</option>
+                                            <option value="Leda">Leda (လှပသိမ့်မွေ့သော အမျိုးသမီးသံ)</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- General Prompt Input -->
+                                    <div class="space-y-1.5">
+                                        <label id="generic-input-label" class="block text-[11px] text-neutral-400">ရေးသားစေလိုသော အကြောင်းအရာကို ညွှန်ကြားပါ</label>
+                                        <textarea id="generic-prompt" rows="5" class="w-full bg-neutral-900 border border-neutral-800 rounded-2xl p-4 text-xs text-white placeholder-neutral-600 focus:outline-none focus:border-purple-500 transition-all resize-none"></textarea>
+                                    </div>
+
+                                    <!-- Microphone Recorder (Voice Screen special) -->
+                                    <div id="mic-recorder-container" class="hidden p-4 rounded-2xl bg-neutral-900 border border-neutral-800 flex items-center justify-between">
+                                        <div class="flex items-center gap-3">
+                                            <span id="recording-indicator" class="w-2 h-2 rounded-full bg-red-600 hidden animate-ping"></span>
+                                            <span id="recording-timer" class="text-xs text-neutral-400">Mic အသုံးပြု၍ အသံဖမ်းပါ</span>
+                                        </div>
+                                        <button id="btn-mic-record" onclick="toggleMicrophone()" class="p-2.5 bg-red-600/10 hover:bg-red-600/20 border border-red-500/20 rounded-xl text-red-500 transition-colors">
+                                            <i data-lucide="mic" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Action Button -->
+                                    <button onclick="triggerGenericGeneration()" class="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white rounded-2xl text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_20px_rgba(168,85,247,0.25)] active:scale-95 flex items-center justify-center gap-2">
+                                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                                        <span id="generic-btn-text">AI ဖြင့် ဖန်တီးမည်</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Output Panel -->
+                            <div class="lg:col-span-7">
+                                <div class="h-full min-h-[400px] flex flex-col p-6 rounded-3xl bg-neutral-950/60 border border-neutral-900">
+                                    <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
+                                        <div class="flex items-center gap-2">
+                                            <i data-lucide="file-output" class="w-4 h-4 text-purple-400"></i>
+                                            <h3 class="font-bold text-sm text-neutral-200">AI Generated Content</h3>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button onclick="shareContent('generic-output-text')" class="p-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-colors" title="Share Content">
+                                                <i data-lucide="share-2" class="w-4 h-4"></i>
+                                            </button>
+                                            <button onclick="copyOutputText('generic-output-text')" class="p-2 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 text-neutral-400 hover:text-white rounded-xl transition-colors" title="Copy Text">
+                                                <i data-lucide="copy" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Placeholder state -->
+                                    <div id="generic-output-placeholder" class="flex-grow flex flex-col items-center justify-center text-center p-8 space-y-4">
+                                        <div class="w-16 h-16 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-600">
+                                            <i data-lucide="brain-circuit" class="w-8 h-8"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs text-neutral-400 font-semibold">AI ဖန်တီးမှု စောင့်ဆိုင်းနေပါသည်</p>
+                                            <p class="text-[11px] text-neutral-500 mt-1 max-w-xs">ဘယ်ဘက်တွင် အကြောင်းအရာ ညွှန်ကြားပြီး စတင်ပါ</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Loader -->
+                                    <div id="generic-output-loader" class="hidden flex-grow flex-col items-center justify-center text-center p-8 space-y-4">
+                                        <div class="w-12 h-12 rounded-full border-4 border-purple-500/10 border-t-purple-600 animate-spin"></div>
+                                        <div>
+                                            <p class="text-xs text-purple-400 font-semibold">AI က တွေးတောရေးသားနေပါသည်</p>
+                                            <p class="text-[10px] text-neutral-500 mt-1">စက္ကန့်အနည်းငယ် ကြာနိုင်ပါသည်...</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Outputs Text & Playback -->
+                                    <div id="generic-output-container" class="hidden flex-grow flex flex-col justify-between space-y-4">
+                                        <div id="generic-output-text" class="text-sm text-neutral-300 leading-relaxed font-sans select-text overflow-y-auto max-h-[300px]">
+                                            <!-- Output values -->
+                                        </div>
+
+                                        <!-- Voice Audio Output Box -->
+                                        <div id="generic-voice-audio-box" class="hidden p-4 rounded-2xl bg-neutral-900 border border-neutral-800 space-y-3">
+                                            <span class="text-[10px] font-semibold text-purple-400 uppercase tracking-wider block">🗣️ AI VOICE Output Playback</span>
+                                            <div class="flex items-center gap-3">
+                                                <audio id="audio-player" class="w-full" controls></audio>
+                                                <button id="download-audio-btn" class="px-4 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-white rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 shrink-0">
+                                                    <i data-lucide="download" class="w-4 h-4"></i> Download
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- PERSISTENT FLOATING BOTTOM NAV BAR (Glassmorphism for Native Look & Feel) -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 glass-nav backdrop-blur-2xl py-3 px-6 md:hidden flex justify-around items-center">
+        <!-- Home Button -->
+        <button onclick="navigateTo('view-home')" id="nav-home" class="flex flex-col items-center justify-center text-purple-400 transition-all scale-100">
+            <i data-lucide="video" class="w-5 h-5"></i>
+            <span class="text-[10px] font-semibold mt-1">Home</span>
+        </button>
+        <!-- History/Library Button -->
+        <button onclick="navigateTo('view-history')" id="nav-history" class="flex flex-col items-center justify-center text-neutral-400 hover:text-white transition-all">
+            <i data-lucide="folder-heart" class="w-5 h-5"></i>
+            <span class="text-[10px] font-semibold mt-1">Library</span>
+        </button>
+        <!-- Settings Button -->
+        <button onclick="navigateTo('view-settings')" id="nav-settings" class="flex flex-col items-center justify-center text-neutral-400 hover:text-white transition-all">
+            <i data-lucide="settings" class="w-5 h-5"></i>
+            <span class="text-[10px] font-semibold mt-1">Settings</span>
+        </button>
+    </nav>
+
+    <!-- Footer for Web / Desktop shells -->
+    <footer class="w-full border-t border-neutral-950 bg-neutral-950/40 py-5 text-center text-[10px] text-neutral-600 z-10 hidden md:block">
+        <p>Built with excellence by <span class="font-semibold text-neutral-400">Automation Nova AI © 2026</span></p>
+    </footer>
+
+    <!-- ============================================== -->
+    <!-- JAVASCRIPT SYSTEM & FLOW CONTROLLER -->
+    <!-- ============================================== -->
+    <script>
+        // Web Audio Synthesizer Class for beautiful App Sound Effects
+        const AppSounds = {
+            ctx: null,
+            enabled: localStorage.getItem('novanex_sound_enabled') !== 'false',
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            playClick() {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(450, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(150, this.ctx.currentTime + 0.05);
+                    gain.gain.setValueAtTime(0.012, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.05);
+                } catch(e) {}
+            },
+            playSuccess() {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(520, this.ctx.currentTime);
+                    osc.frequency.setValueAtTime(880, this.ctx.currentTime + 0.08);
+                    gain.gain.setValueAtTime(0.015, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.25);
+                } catch(e) {}
+            }
+        };
+
+        // App States
+        const state = {
+            currentView: 'view-home',
+            currentTool: null,
+            apiKey: localStorage.getItem('novanex_gemini_key') || "",
+            recapMethod: 'file',
+            recapMastering: 'balanced',
+            audioBlob: null,
+            mediaRecorder: null,
+            audioChunks: [],
+            isRecording: false,
+            recordingTimer: null,
+            recordingSeconds: 0,
+            history: JSON.parse(localStorage.getItem('novanex_app_history')) || []
+        };
+
+        // Standard Tools definition
+        const tools = [
+            { id: 'video_recap', name: 'VIDEO RECAP NV', desc: 'ဗီဒီယိုများမှ အကျဉ်းချုပ်များကို အကောင်းဆုံး စာသားအဖြစ် ပြုလုပ်ပေးမည့် စနစ်', icon: 'video', gradient: 'from-[#a855f7] to-[#4f46e5]', premium: false },
+            { id: 'transcribe', name: 'Video to My Sub.srt', desc: 'ဗီဒီယို မှ SRT Subtitles များသို့ AI Pro ဖြင့် အလိုအလျောက် ပြောင်းလဲပါ', icon: 'subtitles', gradient: 'from-[#60a5fa] to-[#3730a3]', premium: true },
+            { id: 'story_creator', name: 'STORY CREATOR', desc: 'AI က စိတ်လှုပ်ရှားဖွယ် ပုံပြင်ကောင်းများကို ဖန်တီး ရေးသားခြင်း', icon: 'book-open', gradient: 'from-[#c084fc] to-[#7e22ce]', premium: false },
+            { id: 'translate', name: 'TRANSLATE', desc: 'ဘာသာစကားမျိုးစုံကို အဆင်ပြေချောမွေ့စွာ ဘာသာပြန်ဆိုခြင်း', icon: 'languages', gradient: 'from-[#4ade80] to-[#047857]', premium: false },
+            { id: 'ai_voice', name: 'AI VOICE', desc: 'စာသားများမှ သဘာဝကျသော လူသားအသံများကို ထုတ်လုပ်ခြင်း', icon: 'volume-2', gradient: 'from-[#facc15] to-[#c2410c]', premium: false },
+            { id: 'content_creation', name: 'CONTENT CREATION', desc: 'Social Media နှင့် စီးပွားရေး Content များကို အလိုအလျောက် ရေးသားပေးမည်', icon: 'pen-tool', gradient: 'from-[#2dd4bf] to-[#0e7490]', premium: false },
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initApp();
+            lucide.createIcons();
+            setupHapticInteractions();
+        });
+
+        function initApp() {
+            populateToolsGrid();
+            document.getElementById('api-key-input').value = state.apiKey;
+            updateEngineStatus();
+            renderHistoryList();
+            updateSoundUI();
+        }
+
+        // Toggle Sound Effects setting
+        function toggleAudioEffect() {
+            AppSounds.enabled = !AppSounds.enabled;
+            localStorage.setItem('novanex_sound_enabled', AppSounds.enabled);
+            updateSoundUI();
+            if (AppSounds.enabled) {
+                AppSounds.playSuccess();
+                showToast("Haptic Sounds စနစ်ကို ဖွင့်လိုက်ပါပြီ");
+            } else {
+                showToast("Haptic Sounds စနစ်ကို ပိတ်လိုက်ပါပြီ");
+            }
+        }
+
+        function updateSoundUI() {
+            const icon = document.getElementById('sound-icon');
+            const label = document.getElementById('sound-label');
+            if (AppSounds.enabled) {
+                icon.setAttribute('data-lucide', 'volume-2');
+                label.innerText = "Haptic Sounds: On";
+            } else {
+                icon.setAttribute('data-lucide', 'volume-x');
+                label.innerText = "Haptic Sounds: Off";
+            }
+            lucide.createIcons();
+        }
+
+        // Bind Sound popup/haptic sensations to all key interactive selectors
+        function setupHapticInteractions() {
+            document.body.addEventListener('click', (e) => {
+                const target = e.target.closest('button, [onclick], input[type="file"], select, a');
+                if (target) {
+                    AppSounds.playClick();
+                    if (navigator.vibrate) {
+                        navigator.vibrate(12); // Soft physical haptic vibration
+                    }
+                }
+            });
+        }
+
+        // Render Tool Cards Grid
+        function populateToolsGrid() {
+            const grid = document.getElementById('tools-grid');
+            grid.innerHTML = '';
+
+            tools.forEach(tool => {
+                const badge = tool.premium ? `<span class="px-2 py-0.5 bg-purple-500/20 text-purple-400 border border-purple-500/30 text-[9px] font-black rounded uppercase tracking-wider">PRO</span>` : '';
+                
+                const card = document.createElement('div');
+                card.className = "relative group cursor-pointer p-[1px] rounded-3xl transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]";
+                card.innerHTML = `
+                    <div class="absolute inset-0 bg-gradient-to-br ${tool.gradient} opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-3xl blur-[8px] pointer-events-none"></div>
+                    <div class="relative bg-neutral-950/85 hover:bg-neutral-950 border border-neutral-900 p-6 rounded-[23px] flex flex-col justify-between h-56 space-y-4 backdrop-blur-xl transition-all duration-300" onclick="selectTool('${tool.id}')">
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br ${tool.gradient} p-2.5 flex items-center justify-center text-white shadow-lg">
+                                    <i data-lucide="${tool.icon}" class="w-full h-full"></i>
+                                </div>
+                                ${badge}
+                            </div>
+                            <h4 class="font-extrabold text-white text-base tracking-wide">${tool.name}</h4>
+                            <p class="text-xs text-neutral-400 leading-relaxed font-light">${tool.desc}</p>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-xs font-semibold text-neutral-400 group-hover:text-white transition-colors pt-2">
+                            <span>စတင်အသုံးပြုရန်</span>
+                            <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Native view switching (with transitions and bottom bar syncs)
+        function navigateTo(viewId) {
+            const views = ['view-home', 'view-settings', 'view-history', 'view-tool'];
+            
+            views.forEach(v => {
+                const el = document.getElementById(v);
+                if (v === viewId) {
+                    el.classList.remove('page-hidden');
+                    el.classList.add('page-active');
+                } else {
+                    el.classList.remove('page-active');
+                    el.classList.add('page-hidden');
+                }
+            });
+
+            // Sync Nav Buttons highlight
+            const navHome = document.getElementById('nav-home');
+            const navHistory = document.getElementById('nav-history');
+            const navSettings = document.getElementById('nav-settings');
+
+            [navHome, navHistory, navSettings].forEach(b => b.setAttribute('class', 'flex flex-col items-center justify-center text-neutral-400 hover:text-white transition-all'));
+
+            if (viewId === 'view-home') {
+                navHome.setAttribute('class', 'flex flex-col items-center justify-center text-purple-400 transition-all scale-105 font-bold');
+            } else if (viewId === 'view-history') {
+                navHistory.setAttribute('class', 'flex flex-col items-center justify-center text-purple-400 transition-all scale-105 font-bold');
+                renderHistoryList();
+            } else if (viewId === 'view-settings') {
+                navSettings.setAttribute('class', 'flex flex-col items-center justify-center text-purple-400 transition-all scale-105 font-bold');
+            }
+
+            state.currentView = viewId;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Set Engine status visually
+        function updateEngineStatus() {
+            const statusEl = document.getElementById('engine-status');
+            const statusText = document.getElementById('status-text');
+            const desktopStatus = document.getElementById('desktop-engine-status');
+            
+            if (state.apiKey) {
+                const badgeHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span><span>Live Engine Connected</span>`;
+                if(desktopStatus) desktopStatus.innerHTML = badgeHTML;
+
+                statusEl.className = "flex items-center gap-2 px-3.5 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-xs text-emerald-400";
+                statusText.innerText = "Live Connected";
+            } else {
+                const badgeHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span><span>Demo Sandbox Mode</span>`;
+                if(desktopStatus) desktopStatus.innerHTML = badgeHTML;
+
+                statusEl.className = "flex items-center gap-2 px-3.5 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-xs text-amber-400";
+                statusText.innerText = "Demo Mode";
+            }
+        }
+
+        // Notification Toast Helper
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastIcon = document.getElementById('toast-icon');
+            const toastMsg = document.getElementById('toast-message');
+
+            if (type === 'error') {
+                toastIcon.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5 text-red-400"></i>`;
+                toastIcon.className = "text-red-400";
+            } else {
+                toastIcon.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i>`;
+                toastIcon.className = "text-emerald-400";
+            }
+
+            toastMsg.innerText = message;
+            lucide.createIcons();
+
+            toast.classList.remove('-translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.add('-translate-y-20', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 3000);
+        }
+
+        // API Key handlers
+        function toggleKeyVisibility() {
+            const input = document.getElementById('api-key-input');
+            const eyeIcon = document.getElementById('eye-icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                eyeIcon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                input.type = 'password';
+                eyeIcon.setAttribute('data-lucide', 'eye');
+            }
+            lucide.createIcons();
+        }
+
+        function saveApiKey() {
+            const val = document.getElementById('api-key-input').value.trim();
+            if (!val) {
+                showToast("ကျေးဇူးပြု၍ API Key အမှန်ကို ရိုက်ထည့်ပါ", "error");
+                return;
+            }
+            localStorage.setItem('novanex_gemini_key', val);
+            state.apiKey = val;
+            updateEngineStatus();
+            AppSounds.playSuccess();
+            showToast("Gemini Key အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ");
+        }
+
+        function clearApiKey() {
+            document.getElementById('api-key-input').value = '';
+            localStorage.removeItem('novanex_gemini_key');
+            state.apiKey = "";
+            updateEngineStatus();
+            showToast("Gemini Key အား ရှင်းလင်းပြီးပါပြီ", "error");
+        }
+
+        // ==============================================
+        // OFFLINE HISTORY DATABASE (NEW APP FEATURE)
+        // ==============================================
+        function addToHistory(toolId, input, output, metadata = "") {
+            const tool = tools.find(t => t.id === toolId);
+            const historyItem = {
+                id: 'hist_' + Date.now(),
+                toolId: toolId,
+                toolName: tool ? tool.name : "Novanex AI",
+                toolGradient: tool ? tool.gradient : "from-purple-500 to-blue-500",
+                toolIcon: tool ? tool.icon : "sparkles",
+                timestamp: new Date().toLocaleDateString('my', { hour: '2-digit', minute: '2-digit' }),
+                input: input,
+                output: output,
+                metadata: metadata
+            };
+
+            state.history.unshift(historyItem);
+            // Limit to 20 items for lightweight storage
+            if (state.history.length > 20) state.history.pop();
+            
+            localStorage.setItem('novanex_app_history', JSON.stringify(state.history));
+            renderHistoryList();
+        }
+
+        function clearAllHistory() {
+            state.history = [];
+            localStorage.removeItem('novanex_app_history');
+            renderHistoryList();
+            showToast("မှတ်တမ်းများအားလုံးကို ဖျက်ပြီးပါပြီ", "error");
+        }
+
+        function deleteHistoryItem(id, e) {
+            if (e) e.stopPropagation();
+            state.history = state.history.filter(item => item.id !== id);
+            localStorage.setItem('novanex_app_history', JSON.stringify(state.history));
+            renderHistoryList();
+            showToast("မှတ်တမ်းကို ဖျက်ပြီးပါပြီ");
+        }
+
+        function renderHistoryList() {
+            const container = document.getElementById('history-list-container');
+            if (state.history.length === 0) {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center text-center py-16 space-y-4">
+                        <div class="w-16 h-16 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-600">
+                            <i data-lucide="folder-open" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold text-neutral-400">စာကြည့်တိုက်သည် ဗလာဖြစ်နေသည်</p>
+                            <p class="text-[11px] text-neutral-500 mt-1 max-w-xs">သင်ဖန်တီးလိုက်သော အကျဉ်းချုပ်များနှင့် စာသားများ ဤနေရာတွင် အလိုအလျောက် သိမ်းဆည်းပေးမည်</p>
+                        </div>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = '';
+            state.history.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "p-5 rounded-2xl bg-neutral-950 border border-neutral-900 hover:border-neutral-800 transition-all cursor-pointer space-y-3 relative overflow-hidden group";
+                itemDiv.onclick = () => viewSavedHistoryItem(item);
+                itemDiv.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br ${item.toolGradient} p-2 flex items-center justify-center text-white">
+                                <i data-lucide="${item.toolIcon}" class="w-4 h-4"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-white">${item.toolName}</h4>
+                                <p class="text-[10px] text-neutral-500">${item.timestamp}</p>
+                            </div>
+                        </div>
+                        <button onclick="deleteHistoryItem('${item.id}', event)" class="p-2 bg-neutral-900 hover:bg-red-950/30 text-neutral-500 hover:text-red-400 rounded-xl transition-all border border-neutral-800 hover:border-red-900/30">
+                            <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-[10px] text-neutral-500 font-semibold uppercase tracking-wider">ထည့်သွင်းချက် -</p>
+                        <p class="text-xs text-neutral-300 truncate max-w-lg leading-relaxed">${item.input}</p>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-[10px] font-bold text-purple-400 group-hover:text-purple-300 pt-1">
+                        <span>စာသားများပြန်ဖတ်ရန်</span>
+                        <i data-lucide="chevron-right" class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform"></i>
+                    </div>
+                `;
+                container.appendChild(itemDiv);
+            });
+            lucide.createIcons();
+        }
+
+        // View dynamic old outputs from history database
+        function viewSavedHistoryItem(item) {
+            selectTool(item.toolId);
+            
+            setTimeout(() => {
+                if (item.toolId === 'video_recap') {
+                    const contentArea = document.getElementById('recap-output-content');
+                    contentArea.innerHTML = renderMarkdown(item.output);
+                    document.getElementById('recap-output-placeholder').classList.add('hidden');
+                    contentArea.classList.remove('hidden');
+                } else if (item.toolId === 'transcribe') {
+                    const textAre = document.getElementById('srt-textarea');
+                    textAre.value = item.output;
+                    document.getElementById('srt-output-placeholder').classList.add('hidden');
+                    textAre.classList.remove('hidden');
+                    updateSrtStats();
+                } else {
+                    document.getElementById('generic-prompt').value = item.input;
+                    document.getElementById('generic-output-text').innerHTML = renderMarkdown(item.output);
+                    document.getElementById('generic-output-placeholder').classList.add('hidden');
+                    document.getElementById('generic-output-container').classList.remove('hidden');
+                }
+                showToast("မှတ်တမ်းမှ အချက်အလက်များကို ပြန်လည်တင်ပြလိုက်ပါပြီ");
+            }, 100);
+        }
+
+        // ==============================================
+        // NATIVE SHARE OS DIALOG INTEGRATION
+        // ==============================================
+        async function shareContent(elementId) {
+            const el = document.getElementById(elementId);
+            let text = "";
+            if (el.tagName === 'TEXTAREA') {
+                text = el.value;
+            } else {
+                text = el.innerText;
+            }
+
+            if (!text) {
+                showToast("မျှဝေရန် အချက်အလက် မရှိသေးပါ", "error");
+                return;
+            }
+
+            // Slice text for title definition
+            const shareTitle = "NOVANEX AI Generated Studio File";
+            
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: shareTitle,
+                        text: text
+                    });
+                    showToast("OS Share စနစ်ဖြင့် မျှဝေလိုက်ပါပြီ");
+                } catch (e) {
+                    // Fail gracefully / Clipboard backup
+                    copyOutputText(elementId);
+                }
+            } else {
+                copyOutputText(elementId);
+                showToast("Share API မပံ့ပိုးသဖြင့် Clipboard ထဲသို့ ကူးယူပေးလိုက်ပါသည်");
+            }
+        }
+
+
+        // ==============================================
+        // TOOL VIEW SELECTION ROUTING
+        // ==============================================
+        function selectTool(toolId) {
+            state.currentTool = toolId;
+            const tool = tools.find(t => t.id === toolId);
+            if (!tool) return;
+
+            // Change dynamic header in Tool View
+            document.getElementById('tool-view-title').innerText = tool.name;
+            const badge = document.getElementById('tool-view-badge');
+            if (tool.premium) {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+
+            // Hide all tool UIs
+            document.querySelectorAll('.tool-ui-section').forEach(section => section.classList.add('hidden'));
+
+            // Show appropriate dynamic template
+            if (toolId === 'video_recap') {
+                document.getElementById('tool-container-video_recap').classList.remove('hidden');
+                resetRecapTool();
+            } else if (toolId === 'transcribe') {
+                document.getElementById('tool-container-transcribe').classList.remove('hidden');
+                resetTranscribeTool();
+            } else {
+                document.getElementById('tool-container-generic').classList.remove('hidden');
+                setupGenericToolView(toolId);
+            }
+
+            navigateTo('view-tool');
+        }
+
+        // ==============================================
+        // VIDEO RECAP NV LOGIC
+        // ==============================================
+        function resetRecapTool() {
+            setRecapMethod('file');
+            setMastering('balanced');
+            document.getElementById('recap-file').value = '';
+            document.getElementById('recap-file-name').innerText = "ဗီဒီယို ဆွဲထည့်ပါ သို့မဟုတ် ရွေးချယ်ပါ";
+            document.getElementById('recap-url').value = '';
+            
+            document.getElementById('recap-output-placeholder').classList.remove('hidden');
+            document.getElementById('recap-output-loader').classList.add('hidden');
+            document.getElementById('recap-output-content').classList.add('hidden');
+        }
+
+        function setRecapMethod(method) {
+            state.recapMethod = method;
+            const btnFile = document.getElementById('btn-recap-file');
+            const btnLink = document.getElementById('btn-recap-link');
+            const fileContainer = document.getElementById('recap-file-input');
+            const linkContainer = document.getElementById('recap-link-input');
+
+            if (method === 'file') {
+                btnFile.className = "flex-1 py-2.5 text-xs font-semibold rounded-xl bg-purple-600 text-white transition-all";
+                btnLink.className = "flex-1 py-2.5 text-xs font-semibold rounded-xl text-neutral-400 hover:text-white transition-all";
+                fileContainer.classList.remove('hidden');
+                linkContainer.classList.add('hidden');
+            } else {
+                btnFile.className = "flex-1 py-2.5 text-xs font-semibold rounded-xl text-neutral-400 hover:text-white transition-all";
+                btnLink.className = "flex-1 py-2.5 text-xs font-semibold rounded-xl bg-purple-600 text-white transition-all";
+                fileContainer.classList.add('hidden');
+                linkContainer.classList.remove('hidden');
+            }
+        }
+
+        function handleRecapFileSelect(input) {
+            if (input.files && input.files[0]) {
+                document.getElementById('recap-file-name').innerText = input.files[0].name;
+            }
+        }
+
+        function setMastering(style) {
+            state.recapMastering = style;
+            const styles = ['vocal', 'background', 'balanced'];
+            styles.forEach(s => {
+                const btn = document.getElementById(`m-${s}`);
+                if (!btn) return;
+                const icon = btn.querySelector('i, svg');
+                const span = btn.querySelector('span');
+
+                if (s === style) {
+                    btn.className = "p-3 bg-purple-500/10 border border-purple-500/30 rounded-2xl text-center transition-all group";
+                    if (icon) icon.setAttribute('class', "w-4 h-4 mx-auto text-purple-400 mb-1");
+                    if (span) span.className = "text-[10px] font-bold text-purple-400 block";
+                } else {
+                    btn.className = "p-3 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-2xl text-center transition-all group";
+                    if (icon) icon.setAttribute('class', "w-4 h-4 mx-auto text-neutral-500 group-hover:text-purple-400 mb-1");
+                    if (span) span.className = "text-[10px] font-bold text-neutral-400 block";
+                }
+            });
+        }
+
+        async function generateRecap() {
+            // Show Loader
+            document.getElementById('recap-output-placeholder').classList.add('hidden');
+            document.getElementById('recap-output-loader').classList.remove('hidden');
+            document.getElementById('recap-output-content').classList.add('hidden');
+
+            const isLink = state.recapMethod === 'link';
+            const valueSource = isLink ? document.getElementById('recap-url').value.trim() : document.getElementById('recap-file').files[0]?.name;
+
+            if (isLink && !valueSource) {
+                showToast("ဗီဒီယို URL ထည့်သွင်းပေးပါ", "error");
+                resetRecapTool();
+                return;
+            }
+            if (!isLink && !valueSource) {
+                showToast("ဗီဒီယိုဖိုင် ရွေးချယ်ပေးပါ", "error");
+                resetRecapTool();
+                return;
+            }
+
+            const promptText = `ဗီဒီယိုရင်းမြစ် (${valueSource || "တင်ထားသောဖိုင်"}) မှ AI Recap ပြုလုပ်ပေးပါ။ အောက်ပါအချက်အလက်များကို မြန်မာလို အဆင့်ဆင့် စနစ်တကျ ပြန်လည်အကျဉ်းချုပ် ရေးသားပေးပါ။
+            1. အဓိက သော့ချက်များ (Key Highlights)
+            2. စိတ်ဝင်စားဖွယ် ဗျူဟာမြောက် ကောက်နုတ်ချက်များ (Strategic Takeaways)
+            3. အသံမာစတာစတိုင် ${state.recapMastering} အရ မူရင်းဗီဒီယိုအား နားထောင်ရာတွင် အကောင်းဆုံးဖြစ်မည့် အကျဉ်းချုပ်။
+            မြန်မာစာလုံးပေါင်း သတ်ပုံအမှန်များဖြင့် markdown format ဖြင့်သပ်ရပ်စွာ ရေးသားပါ။`;
+
+            try {
+                let responseText = "";
+
+                if (state.apiKey) {
+                    responseText = await callGeminiAPI(promptText);
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, 2500));
+                    responseText = `### 🎬 NOVANEX AI Recap (တုပဆန်းစစ်ချက်)
+
+**ဖိုင်အမည်:** \`${valueSource || 'novanex_video.mp4'}\`
+**အသံစတိုင်:** \`${state.recapMastering.toUpperCase()}\`
+
+---
+
+#### 📌 အဓိက သော့ချက်များ (Key Highlights)
+* **စွမ်းဆောင်ရည်မြှင့်တင်ခြင်း:** ဗီဒီယိုထဲတွင် နည်းပညာဆန်းသစ်မှုများနှင့် ထုတ်လုပ်မှုစွမ်းရည် တိုးတက်လာပုံများကို ရှင်းလင်းစွာဆွေးနွေးထားပါသည်။
+* **ခေတ်မီနည်းပညာ:** Gemini 2.5 နှင့် 3 Engine များအကြောင်း ရှင်းပြထားပြီး generative AI သမိုင်းတွင် ခြေလှမ်းသစ်တစ်ခုဖြစ်ကြောင်း အသိပေးထားသည်။
+
+#### 💡 စိတ်ဝင်စားဖွယ် ကောက်နုတ်ချက်များ (Strategic Takeaways)
+1. **Automation ဦးစားပေး:** လုပ်ငန်းဆောင်တာများတွင် အချိန်ကုန်သက်သာစေရန် AI Recap ကို ပိုမိုအသုံးပြုလာကြသည်။
+2. **အသံအရည်အသွေး:** Audio Mastering \`${state.recapMastering}\` သည် အသံထွက်ကို ပိုမိုရှင်းလင်းစေပြီး နားထောင်သူအတွက် စွဲမက်ဖွယ်ကောင်းစေသည်။
+
+> **မှတ်ချက်:** အထက်ပါ ရလဒ်သည် *Demo Mode* အနေဖြင့် ပြသပေးခြင်းဖြစ်ပါသည်။ တကယ့် Live content အား သင့် API Key ဖြင့် ဆန်းစစ်နိုင်ပါသည်။`;
+                }
+
+                const contentArea = document.getElementById('recap-output-content');
+                contentArea.innerHTML = renderMarkdown(responseText);
+                
+                document.getElementById('recap-output-loader').classList.add('hidden');
+                contentArea.classList.remove('hidden');
+
+                // Save to local Library
+                addToHistory('video_recap', valueSource, responseText, state.recapMastering);
+
+                AppSounds.playSuccess();
+                showToast("AI Recap အောင်မြင်စွာ ဖန်တီးပြီးပါပြီ");
+
+            } catch (err) {
+                showToast("တောင်းဆိုမှု မအောင်မြင်ပါ- " + err.message, "error");
+                resetRecapTool();
+            }
+        }
+
+        // ==============================================
+        // VIDEO TO MY SUB.SRT LOGIC
+        // ==============================================
+        function resetTranscribeTool() {
+            document.getElementById('srt-file').value = '';
+            document.getElementById('srt-file-name').innerText = "ဗီဒီယို သို့မဟုတ် အော်ဒီယိုဖိုင် ရွေးပါ";
+            document.getElementById('srt-stats-blocks').innerText = "0";
+            document.getElementById('srt-stats-lines').innerText = "0";
+            
+            document.getElementById('srt-output-placeholder').classList.remove('hidden');
+            document.getElementById('srt-output-loader').classList.add('hidden');
+            document.getElementById('srt-textarea').classList.add('hidden');
+            document.getElementById('srt-textarea').value = '';
+        }
+
+        function handleSrtFileSelect(input) {
+            if (input.files && input.files[0]) {
+                document.getElementById('srt-file-name').innerText = input.files[0].name;
+            }
+        }
+
+        async function generateSrtSubtitles() {
+            const fileInput = document.getElementById('srt-file');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showToast("ကျေးဇူးပြု၍ Audio သို့မဟုတ် Video ဖိုင်တစ်ခု အရင်ရွေးချယ်ပါ", "error");
+                return;
+            }
+
+            document.getElementById('srt-output-placeholder').classList.add('hidden');
+            document.getElementById('srt-output-loader').classList.remove('hidden');
+            document.getElementById('srt-textarea').classList.add('hidden');
+
+            const fileName = fileInput.files[0].name;
+            const promptText = `ဖိုင်အမည်: ${fileName} အတွက် အော်ဒီယိုမှ စာတန်းထိုး SRT format ထုတ်ပေးပါ။ 
+            မြန်မာဘာသာစကားဖြင့် စာတန်းထိုးများကို သဘာဝကျကျ အဆင့်ဆင့် အပိုင်း (၄) ပိုင်း သတ်မှတ်ပြီး စက္ကန့်အလိုက် timeline များဖြင့် အောက်ပါပုံစံအတိုင်းသာ ထုတ်ပေးပါ-
+            1
+            00:00:01,000 --> 00:00:04,500
+            မင်္ဂလာပါ ခင်ဗျာ။ NOVANEX AI Recap မှ ကြိုဆိုပါတယ်။
+
+            2
+            00:00:05,100 --> 00:00:09,000
+            ယနေ့ ဆွေးနွေးမည့် အကြောင်းအရာမှာ နည်းပညာခေတ်သစ်အကြောင်း ဖြစ်ပါသည်။`;
+
+            try {
+                let srtContent = "";
+
+                if (state.apiKey) {
+                    srtContent = await callGeminiAPI(promptText);
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    srtContent = `1
+00:00:01,000 --> 00:00:04,500
+မင်္ဂလာပါ ခင်ဗျာ။ NOVANEX AI Smart Engine မှ ကြိုဆိုပါတယ်။
+
+2
+00:00:05,200 --> 00:00:08,800
+ဤဗီဒီယိုသည် နည်းပညာနှင့် AI စနစ်များ တိုးတက်ပြောင်းလဲလာမှုအကြောင်း ဖြစ်သည်။
+
+3
+00:00:09,300 --> 00:00:13,100
+ကျွန်ုပ်တို့၏ system က သင့်ဗီဒီယိုထဲမှ အသံလှိုင်းများကို ခြေရာခံပြီး စာတန်းထိုးပေးလိုက်ပါသည်။
+
+4
+00:00:13,800 --> 00:00:18,500
+စနစ်တကျ ဖန်တီးထားသော SRT Subtitle ဖိုင်ကို စိတ်ကြိုက် ပြင်ဆင် ဒေါင်းလုဒ်လုပ်နိုင်ပါသည်။`;
+                }
+
+                const srtTextarea = document.getElementById('srt-textarea');
+                srtTextarea.value = srtContent;
+                
+                document.getElementById('srt-output-loader').classList.add('hidden');
+                srtTextarea.classList.remove('hidden');
+                
+                updateSrtStats();
+
+                // Save to local Library
+                addToHistory('transcribe', fileName, srtContent);
+
+                AppSounds.playSuccess();
+                showToast("SRT Subtitles အောင်မြင်စွာ ထုတ်ယူပြီးပါပြီ");
+
+            } catch (err) {
+                showToast("စာသားထုတ်ယူမှု မအောင်မြင်ပါ- " + err.message, "error");
+                resetTranscribeTool();
+            }
+        }
+
+        function updateSrtStats() {
+            const text = document.getElementById('srt-textarea').value.trim();
+            if (!text) {
+                document.getElementById('srt-stats-blocks').innerText = "0";
+                document.getElementById('srt-stats-lines').innerText = "0";
+                return;
+            }
+
+            const blocks = text.split(/\n\s*\n/).filter(b => b.trim().length > 0);
+            const lines = text.split('\n').filter(l => l.trim().length > 0);
+
+            document.getElementById('srt-stats-blocks').innerText = blocks.length;
+            document.getElementById('srt-stats-lines').innerText = lines.length;
+        }
+
+        function downloadSrtFile() {
+            const content = document.getElementById('srt-textarea').value;
+            let filename = document.getElementById('srt-filename').value.trim();
+            if (!filename) filename = "novanex_subtitle";
+
+            if (!content) {
+                showToast("ဒေါင်းလုဒ်လုပ်ရန် အကြောင်းအရာ မရှိသေးပါ", "error");
+                return;
+            }
+
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${filename}.srt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast(".srt ဖိုင် ဒေါင်းလုဒ်လုပ်ခြင်း အောင်မြင်ပါသည်");
+        }
+
+
+        // ==============================================
+        // GENERIC TOOLS LOGIC (STORY, TRANSLATE, VOICE, CONTENT)
+        // ==============================================
+        function setupGenericToolView(toolId) {
+            const promptInput = document.getElementById('generic-prompt');
+            const inputHeader = document.getElementById('generic-input-header');
+            const inputLabel = document.getElementById('generic-input-label');
+            const btnText = document.getElementById('generic-btn-text');
+            const voiceOptions = document.getElementById('voice-options-container');
+            const micRecorder = document.getElementById('mic-recorder-container');
+            
+            voiceOptions.classList.add('hidden');
+            micRecorder.classList.add('hidden');
+            document.getElementById('generic-voice-audio-box').classList.add('hidden');
+
+            if (toolId === 'story_creator') {
+                inputHeader.innerText = "ပုံပြင်ဖန်တီးသူ";
+                inputLabel.innerText = "ပုံပြင်ဇာတ်လမ်း အကြောင်းအရာ (ဥပမာ- တောအုပ်ထဲက ယုန်ကလေးနှင့် ခြင်္သေ့)";
+                promptInput.placeholder = "ရေးလိုသော ပုံပြင်၏ အဓိကစိတ်ကူး သို့မဟုတ် ဇာတ်ကောင်များကို ရေးပါ။";
+                btnText.innerText = "AI ပုံပြင် ရေးသားမည်";
+            } else if (toolId === 'translate') {
+                inputHeader.innerText = "ဘာသာပြန်စနစ်";
+                inputLabel.innerText = "ဘာသာပြန်လိုသော စာသားကို ရိုက်ထည့်ပါ (ထွက်ပေါ်စေလိုသော ဘာသာစကားပါ ညွှန်ကြားပါ)";
+                promptInput.placeholder = "ဘာသာပြန်စရာများ ရေးသားပြီး (ဥပမာ - အင်္ဂလိပ်မှ မြန်မာသို့ ပြန်ပါ)...";
+                btnText.innerText = "AI ဘာသာပြန်မည်";
+            } else if (toolId === 'ai_voice') {
+                inputHeader.innerText = "စာသားမှ အသံထုတ်ခြင်း (AI Voice Generator)";
+                inputLabel.innerText = "အသံထွက်စေလိုသော စာသားကို ရေးသားပါ (အင်္ဂလိပ် / အခြား စာသားများ)";
+                promptInput.placeholder = "Voice ထုတ်ယူမည့် script အား ရေးသားပေးပါ...";
+                btnText.innerText = "AI Voice အသံထုတ်မည်";
+                voiceOptions.classList.remove('hidden');
+                micRecorder.classList.remove('hidden');
+            } else if (toolId === 'content_creation') {
+                inputHeader.innerText = "Content ဖန်တီးသူ";
+                inputLabel.innerText = "Content Topic သို့မဟုတ် ရည်ရွယ်ချက်";
+                promptInput.placeholder = "Facebook content, စီးပွားရေး ကြော်ငြာ သို့မဟုတ် စာစုတိုများ ဖန်တီးရန်...";
+                btnText.innerText = "Content ရေးသားမည်";
+            }
+
+            document.getElementById('generic-output-placeholder').classList.remove('hidden');
+            document.getElementById('generic-output-loader').classList.add('hidden');
+            document.getElementById('generic-output-container').classList.add('hidden');
+            document.getElementById('generic-output-text').innerHTML = '';
+            promptInput.value = '';
+        }
+
+        async function triggerGenericGeneration() {
+            const promptInput = document.getElementById('generic-prompt').value.trim();
+            if (!promptInput) {
+                showToast("ကျေးဇူးပြု၍ အချက်အလက်များ အရင်ထည့်သွင်းပါ", "error");
+                return;
+            }
+
+            document.getElementById('generic-output-placeholder').classList.add('hidden');
+            document.getElementById('generic-output-loader').classList.remove('hidden');
+            document.getElementById('generic-output-container').classList.add('hidden');
+            document.getElementById('generic-voice-audio-box').classList.add('hidden');
+
+            try {
+                if (state.currentTool === 'ai_voice') {
+                    await handleVoiceGeneration(promptInput);
+                } else {
+                    let responseText = "";
+                    let systemPrompt = "";
+
+                    if (state.currentTool === 'story_creator') {
+                        systemPrompt = "မင်းက ကမ္ဘာကျော် မြန်မာပုံပြင်ပြောကောင်းသူတစ်ယောက်ဖြစ်တယ်။ ပုံပြင်ကို သေသပ်လှပပြီး ကလေးတွေအတွက် စိတ်ဝင်စားစရာ စာလုံးပေါင်းသတ်ပုံအမှန်များနဲ့ ရေးသားပေးပါ။";
+                    } else if (state.currentTool === 'translate') {
+                        systemPrompt = "မင်းက ဘာသာစကားကျွမ်းကျင်ပညာရှင်ဖြစ်တယ်။ ပေးထားတဲ့စာသားတွေကို တိကျတဲ့ မြန်မာမှုပြုပြီး ဘာသာပြန်ပေးပါ။";
+                    } else {
+                        systemPrompt = "မင်းက Professional Content Writer တစ်ယောက်ဖြစ်တယ်။ ဆွဲဆောင်မှုရှိတဲ့ Social Media / Marketing contents တွေကို မြန်မာလို ရေးသားပေးပါ။";
+                    }
+
+                    if (state.apiKey) {
+                        responseText = await callGeminiAPI(promptInput, systemPrompt);
+                    } else {
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        if (state.currentTool === 'story_creator') {
+                            responseText = `### 📖 ရွှေရောင်လိပ်ပြာငယ်လေး၏ စွန့်စားခန်း (Demo)
+
+တစ်ခါက လှပသော တောအုပ်တစ်ခုတွင် ထူးခြားဆန်းပြားသော **ရွှေရောင်လိပ်ပြာလေး** တစ်ကောင် ရှိလေသည်။ သူ၏ အတောင်ပံများသည် နေရောင်အောက်တွင် ရွှေကဲ့သို့ တောက်ပနေတတ်သည်။
+
+တစ်နေ့တွင် လိပ်ပြာလေးသည် သူငယ်ချင်းများနှင့်ဝေးရာ အရောင်ပျောက်ဆုံးနေသော တောင်ကုန်းတစ်ခုသို့ ရောက်ရှိသွားသည်။ ထိုတောင်ကုန်းတွင် ပန်းပွင့်လေးများမှာ အရောင်မရှိဘဲ မွဲခြောက်နေကြသည်။ 
+
+* **သင်ခန်းစာ:** သူတစ်ပါးကို ကူညီခြင်းသည် သင့်အားလည်း ပိုမိုတောက်ပသော ပျော်ရွှင်မှုကို ပေးနိုင်သည်။
+* **နိဂုံး:** လိပ်ပြာလေး၏ နွေးထွေးသော စေတနာကြောင့် ပန်းပွင့်လေးများ ပြန်လည်စိုပြေလာကာ တောအုပ်တစ်ခုလုံး လှပသွားလေသည်။`;
+                        } else if (state.currentTool === 'translate') {
+                            responseText = `### 🌐 ဘာသာပြန်ဆိုပြီးသော စာသားများ (Demo Mode)
+
+**မူရင်းစာသား:**
+> "${promptInput}"
+
+---
+
+**ဘာသာပြန်ရလဒ်:**
+ဤသည်မှာ API Key မပါရှိဘဲ ပြသပေးသော Demo ဘာသာပြန်ဆိုချက် ဖြစ်ပါသည်။ Gemini Key ထည့်သွင်းပါက ပိုမိုတိကျသော မြန်မာပြန်များကို ရရှိနိုင်မည် ဖြစ်ပါသည်။`;
+                        } else {
+                            responseText = `### 📱 NOVANEX Content Planner (Demo)
+
+သင့်ရဲ့ Topic: \`${promptInput}\` အတွက် အသင့်သုံးနိုင်မည့် အိုင်ဒီယာ-
+
+1. **စွဲဆောင်မှုရှိသော ခေါင်းစဉ်:** "ခေတ်သစ်ကို ဦးဆောင်ဖို့ သင် အဆင်သင့်ဖြစ်ပြီလား?"
+2. **အဓိကစာသား:** နည်းပညာတွေ ပြောင်းလဲလာတာနဲ့အမျှ သင့်လုပ်ငန်းခွင်မှာ AI ကို အကျိုးရှိရှိအသုံးပြုဖို့ မရှိမဖြစ် လိုအပ်လာပါပြီ။
+3. **Hashtags:** #NovanexAI #ContentStrategy #FutureReady`;
+                        }
+                    }
+
+                    document.getElementById('generic-output-text').innerHTML = renderMarkdown(responseText);
+                    document.getElementById('generic-output-loader').classList.add('hidden');
+                    document.getElementById('generic-output-container').classList.remove('hidden');
+
+                    // Save to local Library
+                    addToHistory(state.currentTool, promptInput, responseText);
+                    AppSounds.playSuccess();
+                    showToast("AI ဖန်တီးမှု ရလဒ် ထွက်ပေါ်လာပါပြီ");
+                }
+            } catch (err) {
+                showToast("ဖန်တီးမှု မအောင်မြင်ပါ- " + err.message, "error");
+                document.getElementById('generic-output-loader').classList.add('hidden');
+                document.getElementById('generic-output-placeholder').classList.remove('hidden');
+            }
+        }
+
+        // ==============================================
+        // REAL TTS GEMINI API OR SIMULATED PLAYER
+        // ==============================================
+        async function handleVoiceGeneration(scriptText) {
+            const voiceCharacter = document.getElementById('voice-character').value;
+            
+            if (state.apiKey) {
+                try {
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${state.apiKey}`;
+                    
+                    const payload = {
+                        contents: [{
+                            parts: [{ text: `Please speak beautifully: ${scriptText}` }]
+                        }],
+                        generationConfig: {
+                            responseModalities: ["AUDIO"],
+                            speechConfig: {
+                                voiceConfig: {
+                                    prebuiltVoiceConfig: {
+                                        voiceName: voiceCharacter
+                                    }
+                                }
+                            }
+                        }
+                    };
+
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`TTS Engine Error Code: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    const audioPart = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData && p.inlineData.mimeType.startsWith('audio/'));
+
+                    if (!audioPart) {
+                        throw new Error("API က သင့်လျော်သော အော်ဒီယိုဒေတာ ပြန်မပေးခဲ့ပါ။");
+                    }
+
+                    const base64Data = audioPart.inlineData.data;
+                    const mimeType = audioPart.inlineData.mimeType;
+                    const sampleRate = extractSampleRate(mimeType) || 24000;
+
+                    const pcmBuffer = base64ToArrayBuffer(base64Data);
+                    const wavBlob = convertPCMToWav(pcmBuffer, sampleRate);
+
+                    setupAudioPlayer(wavBlob);
+
+                    document.getElementById('generic-output-text').innerHTML = `<p class="text-xs text-neutral-400">အောက်ပါ Player အားအသုံးပြု၍ ဖန်တီးလိုက်သော အော်ဒီယိုကို နားဆင်ပါ။ ဇာတ်ကောင်: <strong>${voiceCharacter}</strong></p>`;
+                    document.getElementById('generic-output-loader').classList.add('hidden');
+                    document.getElementById('generic-output-container').classList.remove('hidden');
+                    document.getElementById('generic-voice-audio-box').classList.remove('hidden');
+
+                    // Save to local Library
+                    addToHistory('ai_voice', scriptText, `အော်ဒီယိုဖိုင်ဖန်တီးမှု - ဇာတ်ကောင် ${voiceCharacter}`);
+
+                    AppSounds.playSuccess();
+                    showToast("AI Voice အသံဖန်တီးမှု ပြီးမြောက်ပါပြီ");
+
+                } catch (err) {
+                    throw new Error("TTS Failure: " + err.message);
+                }
+            } else {
+                await new Promise(resolve => setTimeout(resolve, 2500));
+
+                const synthWav = createSyntheticBeepBlob();
+                setupAudioPlayer(synthWav);
+
+                document.getElementById('generic-output-text').innerHTML = `
+                    <div class="space-y-3">
+                        <p class="text-xs text-amber-400 font-bold">⚠️ Demo Simulator Mode</p>
+                        <p class="text-xs text-neutral-400">သင်ရေးသားလိုက်သော စာသားကို ဇာတ်ကောင် <strong>${voiceCharacter}</strong> အသံဖြင့် ထုတ်လုပ်ရန် Gemini API Key ထည့်သွင်းထားရန် လိုအပ်ပါသည်။ အထက်ပါ Player တွင် သရုပ်ပြ စမ်းသပ်သံကို နားဆင်နိုင်ပါသည်။</p>
+                    </div>
+                `;
+                document.getElementById('generic-output-loader').classList.add('hidden');
+                document.getElementById('generic-output-container').classList.remove('hidden');
+                document.getElementById('generic-voice-audio-box').classList.remove('hidden');
+
+                addToHistory('ai_voice', scriptText, `[DEMO] အော်ဒီယိုဖိုင်ဖန်တီးမှု - ဇာတ်ကောင် ${voiceCharacter}`);
+                AppSounds.playSuccess();
+                showToast("သရုပ်ပြအသံ ဖန်တီးပြီးပါပြီ");
+            }
+        }
+
+        function setupAudioPlayer(blob) {
+            const player = document.getElementById('audio-player');
+            const downloadBtn = document.getElementById('download-audio-btn');
+            const audioUrl = URL.createObjectURL(blob);
+
+            player.src = audioUrl;
+            
+            downloadBtn.onclick = () => {
+                const a = document.createElement('a');
+                a.href = audioUrl;
+                a.download = `novanex_ai_voice_${Date.now()}.wav`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                showToast("အသံဖိုင် ဒေါင်းလုဒ်လုပ်ခြင်း အောင်မြင်ပါသည်");
+            };
+        }
+
+        function extractSampleRate(mimeType) {
+            const match = mimeType.match(/rate=(\d+)/);
+            return match ? parseInt(match[1], 10) : null;
+        }
+
+        function base64ToArrayBuffer(base64) {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function convertPCMToWav(pcmBuffer, sampleRate) {
+            const buffer = new Uint8Array(pcmBuffer);
+            const wavHeader = new ArrayBuffer(44);
+            const view = new DataView(wavHeader);
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + buffer.length, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, 1, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, buffer.length, true);
+
+            const completeWav = new Uint8Array(wavHeader.byteLength + buffer.byteLength);
+            completeWav.set(new Uint8Array(wavHeader), 0);
+            completeWav.set(buffer, wavHeader.byteLength);
+
+            return new Blob([completeWav], { type: 'audio/wav' });
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        function createSyntheticBeepBlob() {
+            const sampleRate = 8000;
+            const duration = 1.5;
+            const numSamples = sampleRate * duration;
+            const buffer = new ArrayBuffer(numSamples * 2);
+            const view = new DataView(buffer);
+
+            for (let i = 0; i < numSamples; i++) {
+                const t = i / sampleRate;
+                const sample = Math.sin(2 * Math.PI * 440 * t) * 0.3 + Math.sin(2 * Math.PI * 880 * t) * 0.1;
+                const intSample = Math.floor(sample * 32767);
+                view.setInt16(i * 2, intSample, true);
+            }
+
+            return convertPCMToWav(buffer, sampleRate);
+        }
+
+        // Voice Recording via Microphone (Mock translation indicator for Voice UI)
+        async function toggleMicrophone() {
+            const btn = document.getElementById('btn-mic-record');
+            const ind = document.getElementById('recording-indicator');
+            const timer = document.getElementById('recording-timer');
+
+            if (!state.isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    state.audioChunks = [];
+                    state.mediaRecorder = new MediaRecorder(stream);
+                    
+                    state.mediaRecorder.ondataavailable = e => {
+                        if (e.data.size > 0) state.audioChunks.push(e.data);
+                    };
+
+                    state.mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(state.audioChunks, { type: 'audio/wav' });
+                        state.audioBlob = audioBlob;
+                        document.getElementById('generic-prompt').value = "[အသံသွင်းထားသော မက်ဆေ့ခ်ျ - 'NOVANEX AI Recap စနစ်ကို စမ်းသပ်အသုံးပြုနေပါသည်']";
+                        showToast("အသံဖမ်းယူမှု ပြီးမြောက်ပြီး စာသားပြောင်းလဲလိုက်ပါပြီ");
+                    };
+
+                    state.mediaRecorder.start();
+                    state.isRecording = true;
+                    btn.className = "p-2.5 bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-500/20 text-emerald-500 transition-colors";
+                    btn.innerHTML = `<i data-lucide="square" class="w-4 h-4"></i>`;
+                    ind.classList.remove('hidden');
+
+                    state.recordingSeconds = 0;
+                    state.recordingTimer = setInterval(() => {
+                        state.recordingSeconds++;
+                        timer.innerText = `အသံဖမ်းယူနေသည်: ${state.recordingSeconds}s`;
+                    }, 1000);
+
+                    lucide.createIcons();
+                } catch (err) {
+                    showToast("မိုက်ခရိုဖုန်း ခွင့်ပြုချက် မရရှိပါ", "error");
+                }
+            } else {
+                state.mediaRecorder.stop();
+                state.isRecording = false;
+                clearInterval(state.recordingTimer);
+                
+                btn.className = "p-2.5 bg-red-600/10 hover:bg-red-600/20 border border-red-500/20 text-red-500 transition-colors";
+                btn.innerHTML = `<i data-lucide="mic" class="w-4 h-4"></i>`;
+                ind.classList.add('hidden');
+                timer.innerText = "Mic အသုံးပြု၍ အသံဖမ်းပါ";
+                lucide.createIcons();
+            }
+        }
+
+
+        // ==============================================
+        // CORE INTEGRATED GEMINI CHAT CONNECTOR (API)
+        // ==============================================
+        async function callGeminiAPI(userQuery, systemPrompt = "မင်းက အကူအညီပေးချင်တဲ့ ဆန်းသစ်သော NOVANEX AI Engine ဖြစ်တယ်။") {
+            const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${state.apiKey}`;
+            
+            const payload = {
+                contents: [{
+                    parts: [{ text: userQuery }]
+                }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                }
+            };
+
+            let delay = 1000;
+            for (let attempt = 1; attempt <= 5; attempt++) {
+                try {
+                    const response = await fetch(apiEndpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        const outText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                        if (outText) return outText;
+                        throw new Error("ပြန်လာသော ရလဒ်ထဲတွင် စာသားမတွေ့ရပါ။");
+                    }
+                    
+                    if (response.status === 429 || response.status >= 500) {
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        delay *= 2;
+                        continue;
+                    }
+
+                    throw new Error(`API တုံ့ပြန်မှု ကုဒ်: ${response.status}`);
+                } catch (error) {
+                    if (attempt === 5) {
+                        throw new Error("ကြိုးပမ်းမှု (၅) ကြိမ်လုံး မအောင်မြင်ပါ။ အင်တာနက် သို့မဟုတ် API Key ကို စစ်ဆေးပါ။");
+                    }
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        // Copy Clipboard Utility with backup frame execution
+        function copyOutputText(elementId) {
+            const textEl = document.getElementById(elementId);
+            let text = "";
+            if (textEl.tagName === 'TEXTAREA') {
+                text = textEl.value;
+            } else {
+                text = textEl.innerText;
+            }
+
+            if (!text) {
+                showToast("ကူးယူရန် အကြောင်းအရာ မရှိသေးပါ", "error");
+                return;
+            }
+
+            const tempInput = document.createElement('textarea');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            showToast("Clipboard ထဲသို့ ကူးယူပြီးပါပြီ");
+        }
+
+        // Basic clean markdown converter
+        function renderMarkdown(md) {
+            let html = md;
+            html = html.replace(/^### (.*$)/gim, '<h4 class="text-sm font-bold text-white mt-4 mb-2">$1</h4>');
+            html = html.replace(/^#### (.*$)/gim, '<h5 class="text-xs font-semibold text-purple-400 mt-3 mb-1">$1</h5>');
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em class="text-neutral-400">$1</em>');
+            html = html.replace(/^\* (.*$)/gim, '<li class="ml-4 list-disc text-neutral-300 text-xs my-1">$1</li>');
+            html = html.replace(/^\d+\. (.*$)/gim, '<li class="ml-4 list-decimal text-neutral-300 text-xs my-1">$1</li>');
+            html = html.replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-purple-500 bg-neutral-900/60 p-3 my-3 text-xs italic text-neutral-400 rounded-r-xl">$1</blockquote>');
+            html = html.replace(/^---/gim, '<hr class="border-neutral-900 my-4">');
+            
+            return html;
+        }
+    </script>
+</body>
+</html>
