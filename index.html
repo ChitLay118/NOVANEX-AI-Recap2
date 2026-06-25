@@ -114,7 +114,7 @@
 <body class="min-h-screen relative flex flex-col justify-between pb-24 md:pb-6">
 
     <!-- OS Ambient background lights -->
-    <div id="glow-1" class="ambient-glow top-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-600"></div>
+    <div id="glow-1" class="ambient-glow top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-purple-900/10 blur-[120px] pointer-events-none"></div>
     <div id="glow-2" class="ambient-glow bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-blue-600"></div>
 
     <!-- MAIN OS SHELL WINDOW CONTAINER -->
@@ -173,7 +173,7 @@
                 <div class="text-center py-4 flex flex-col items-center justify-center space-y-4">
                     <div class="relative group">
                         <div class="absolute -inset-1 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 opacity-30 blur-2xl group-hover:opacity-55 transition duration-1000"></div>
-                        <img src="https://i.ibb.co/GGFXB2K/file-00000000923c7208b994f09e61a7164b.png" alt="NOVANEX Logo" class="relative w-24 h-24 object-contain rounded-full border border-white/10 p-1 bg-black/80 shadow-2xl transition-transform duration-500 hover:scale-105" onerror="this.src='https://placehold.co/150x150/09090b/ffffff?text=N'">
+                        <img src="https://i.ibb.co/GGFXB2K/file-00000000923c7208b994f09e61a7164b.png" alt="NOVANEX Logo" class="relative w-24 h-24 object-contain rounded-full border border-white/10 p-1 bg-black/60 shadow-2xl transition-transform duration-500 hover:scale-105" onerror="this.src='https://placehold.co/150x150/09090b/ffffff?text=N'">
                     </div>
                     
                     <div class="space-y-1">
@@ -326,9 +326,9 @@
             <!-- ============================================== -->
             <!-- VIEW 4: DYNAMIC TOOL VIEWS -->
             <!-- ============================================== -->
-            <div id="view-tool" class="page-view page-hidden space-y-6">
-                <!-- Tool Header with dynamic title -->
-                <div class="flex items-center justify-between">
+            <div id="view-tool" class="page-view page-hidden space-y-6 pt-0">
+                <!-- Tool Header with dynamic title - Sticky Top-0 to remain visible when scrolling -->
+                <div class="sticky top-0 z-30 flex items-center justify-between bg-neutral-950/95 backdrop-blur-md py-4 border-b border-neutral-900/60 -mx-4 px-4 md:-mx-8 md:px-8">
                     <div class="flex items-center gap-4">
                         <button onclick="navigateTo('view-home')" class="p-2.5 bg-neutral-900/60 border border-neutral-800 rounded-2xl text-neutral-300 hover:text-white hover:bg-neutral-800 transition-all active:scale-90">
                             <i data-lucide="arrow-left" class="w-5 h-5"></i>
@@ -347,7 +347,7 @@
                 </div>
 
                 <!-- TOOL VIEWS CONTAINER -->
-                <div class="w-full">
+                <div class="w-full pt-4">
                     
                     <!-- [A] VIDEO RECAP NV TOOL -->
                     <div id="tool-container-video_recap" class="tool-ui-section hidden space-y-6">
@@ -956,30 +956,7 @@
             lucide.createIcons();
         }
 
-        function saveApiKey() {
-            const val = document.getElementById('api-key-input').value.trim();
-            if (!val) {
-                showToast("ကျေးဇူးပြု၍ API Key အမှန်ကို ရိုက်ထည့်ပါ", "error");
-                return;
-            }
-            localStorage.setItem('novanex_gemini_key', val);
-            state.apiKey = val;
-            updateEngineStatus();
-            AppSounds.playSuccess();
-            showToast("Gemini Key အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ");
-        }
-
-        function clearApiKey() {
-            document.getElementById('api-key-input').value = '';
-            localStorage.removeItem('novanex_gemini_key');
-            state.apiKey = "";
-            updateEngineStatus();
-            showToast("Gemini Key အား ရှင်းလင်းပြီးပါပြီ", "error");
-        }
-
-        // ==============================================
-        // OFFLINE HISTORY DATABASE (NEW APP FEATURE)
-        // ==============================================
+        // OFFLINE HISTORY DATABASE
         function addToHistory(toolId, input, output, metadata = "") {
             const tool = tools.find(t => t.id === toolId);
             const historyItem = {
@@ -995,7 +972,6 @@
             };
 
             state.history.unshift(historyItem);
-            // Limit to 20 items for lightweight storage
             if (state.history.length > 20) state.history.pop();
             
             localStorage.setItem('novanex_app_history', JSON.stringify(state.history));
@@ -1100,36 +1076,52 @@
         // ==============================================
         async function shareContent(elementId) {
             const el = document.getElementById(elementId);
-            let text = "";
-            if (el.tagName === 'TEXTAREA') {
-                text = el.value;
-            } else {
-                text = el.innerText;
-            }
+            let text = (el.tagName === 'TEXTAREA') ? el.value : el.innerText;
 
             if (!text) {
                 showToast("မျှဝေရန် အချက်အလက် မရှိသေးပါ", "error");
                 return;
             }
 
-            const shareTitle = "NOVANEX AI Generated Studio File";
-            
-            if (navigator.share) {
+            // App ထဲမှာ ရောက်နေလား စစ်ဆေးပြီး AndroidInterface ကို ခေါ်မယ်
+            if (window.AndroidInterface && window.AndroidInterface.shareText) {
+                window.AndroidInterface.shareText(text);
+            } 
+            // Browser မှာဆိုရင်တော့ မူရင်း navigator.share ကို သုံးမယ်
+            else if (navigator.share) {
                 try {
                     await navigator.share({
-                        title: shareTitle,
+                        title: "NOVANEX AI Recap",
                         text: text
                     });
-                    showToast("OS Share စနစ်ဖြင့် မျှဝေလိုက်ပါပြီ");
                 } catch (e) {
                     copyOutputText(elementId);
                 }
             } else {
                 copyOutputText(elementId);
-                showToast("Share API မပံ့ပိုးသဖြင့် Clipboard ထဲသို့ ကူးယူပေးလိုက်ပါသည်");
             }
         }
 
+        function saveApiKey() {
+            const val = document.getElementById('api-key-input').value.trim();
+            if (!val) {
+                showToast("ကျေးဇူးပြု၍ API Key အမှန်ကို ရိုက်ထည့်ပါ", "error");
+                return;
+            }
+            localStorage.setItem('novanex_gemini_key', val);
+            state.apiKey = val;
+            updateEngineStatus();
+            AppSounds.playSuccess();
+            showToast("Gemini Key အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ");
+        }
+
+        function clearApiKey() {
+            document.getElementById('api-key-input').value = '';
+            localStorage.removeItem('novanex_gemini_key');
+            state.apiKey = "";
+            updateEngineStatus();
+            showToast("Gemini Key အား ရှင်းလင်းပြီးပါပြီ", "error");
+        }
 
         // ==============================================
         // TOOL VIEW SELECTION ROUTING
@@ -1549,7 +1541,7 @@
 
 တစ်နေ့တွင် လိပ်ပြာလေးသည် သူငယ်ချင်းများနှင့်ဝေးရာ အရောင်ပျောက်ဆုံးနေသော တောင်ကုန်းတစ်ခုသို့ ရောက်ရှိသွားသည်။ ထိုတောင်ကုန်းတွင် ပန်းပွင့်လေးများမှာ အရောင်မရှိဘဲ မွဲခြောက်နေကြသည်။ 
 
-* **¼သင်ခန်းစာ:** သူတစ်ပါးကို ကူညီခြင်းသည် သင့်အားလည်း ပိုမိုတောက်ပသော ပျော်ရွှင်မှုကို ပေးနိုင်သည်။
+* **သင်ခန်းစာ:** သူတစ်ပါးကို ကူညီခြင်းသည် သင့်အားလည်း ပိုမိုတောက်ပသော ပျော်ရွှင်မှုကို ပေးနိုင်သည်။
 * **နိဂုံး:** လိပ်ပြာလေး၏ နွေးထွေးသော စေတနာကြောင့် ပန်းပွင့်လေးများ ပြန်လည်စိုပြေလာကာ တောအုပ်တစ်ခုလုံး လှပသွားလေသည်။`;
                         } else if (state.currentTool === 'translate') {
                             responseText = `### 🌐 ဘာသာပြန်ဆိုပြီးသော စာသားများ (Demo Mode)
