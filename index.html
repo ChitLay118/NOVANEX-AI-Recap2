@@ -1112,7 +1112,6 @@
                 return;
             }
 
-            // Slice text for title definition
             const shareTitle = "NOVANEX AI Generated Studio File";
             
             if (navigator.share) {
@@ -1123,7 +1122,6 @@
                     });
                     showToast("OS Share စနစ်ဖြင့် မျှဝေလိုက်ပါပြီ");
                 } catch (e) {
-                    // Fail gracefully / Clipboard backup
                     copyOutputText(elementId);
                 }
             } else {
@@ -1250,17 +1248,30 @@
                 return;
             }
 
-            const promptText = `ဗီဒီယိုရင်းမြစ် (${valueSource || "တင်ထားသောဖိုင်"}) မှ AI Recap ပြုလုပ်ပေးပါ။ အောက်ပါအချက်အလက်များကို မြန်မာလို အဆင့်ဆင့် စနစ်တကျ ပြန်လည်အကျဉ်းချုပ် ရေးသားပေးပါ။
-            1. အဓိက သော့ချက်များ (Key Highlights)
-            2. စိတ်ဝင်စားဖွယ် ဗျူဟာမြောက် ကောက်နုတ်ချက်များ (Strategic Takeaways)
-            3. အသံမာစတာစတိုင် ${state.recapMastering} အရ မူရင်းဗီဒီယိုအား နားထောင်ရာတွင် အကောင်းဆုံးဖြစ်မည့် အကျဉ်းချုပ်။
-            မြန်မာစာလုံးပေါင်း သတ်ပုံအမှန်များဖြင့် markdown format ဖြင့်သပ်ရပ်စွာ ရေးသားပါ။`;
-
             try {
                 let responseText = "";
 
                 if (state.apiKey) {
-                    responseText = await callGeminiAPI(promptText);
+                    let mediaPart = null;
+                    if (!isLink) {
+                        const file = document.getElementById('recap-file').files[0];
+                        showToast("ဗီဒီယိုဖိုင်အား AI သို့ ပို့ရန် ပြင်ဆင်နေပါသည်...");
+                        const base64Data = await fileToBase64(file);
+                        mediaPart = {
+                            inlineData: {
+                                data: base64Data.split(',')[1],
+                                mimeType: file.type || "video/mp4"
+                            }
+                        };
+                    }
+
+                    const promptText = `ဗီဒီယိုရင်းမြစ် (${valueSource || "တင်ထားသောဖိုင်"}) မှ AI Recap ပြုလုပ်ပေးပါ။ အောက်ပါအချက်အလက်များကို မြန်မာလို အဆင့်ဆင့် စနစ်တကျ ပြန်လည်အကျဉ်းချုပ် ရေးသားပေးပါ။
+                    1. အဓိက သော့ချက်များ (Key Highlights)
+                    2. စိတ်ဝင်စားဖွယ် ဗျူဟာမြောက် ကောက်နုတ်ချက်များ (Strategic Takeaways)
+                    3. အသံမာစတာစတိုင် ${state.recapMastering} အရ မူရင်းဗီဒီယိုအား နားထောင်ရာတွင် အကောင်းဆုံးဖြစ်မည့် အကျဉ်းချုပ်။
+                    မြန်မာစာလုံးပေါင်း သတ်ပုံအမှန်များဖြင့် markdown format ဖြင့်သပ်ရပ်စွာ ရေးသားပါ။`;
+
+                    responseText = await callGeminiAPIWithMedia(promptText, mediaPart);
                 } else {
                     await new Promise(resolve => setTimeout(resolve, 2500));
                     responseText = `### 🎬 NOVANEX AI Recap (တုပဆန်းစစ်ချက်)
@@ -1299,6 +1310,16 @@
             }
         }
 
+        // Helper to convert File object to Base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
         // ==============================================
         // VIDEO TO MY SUB.SRT LOGIC
         // ==============================================
@@ -1331,22 +1352,37 @@
             document.getElementById('srt-output-loader').classList.remove('hidden');
             document.getElementById('srt-textarea').classList.add('hidden');
 
-            const fileName = fileInput.files[0].name;
-            const promptText = `ဖိုင်အမည်: ${fileName} အတွက် အော်ဒီယိုမှ စာတန်းထိုး SRT format ထုတ်ပေးပါ။ 
-            မြန်မာဘာသာစကားဖြင့် စာတန်းထိုးများကို သဘာဝကျကျ အဆင့်ဆင့် အပိုင်း (၄) ပိုင်း သတ်မှတ်ပြီး စက္ကန့်အလိုက် timeline များဖြင့် အောက်ပါပုံစံအတိုင်းသာ ထုတ်ပေးပါ-
-            1
-            00:00:01,000 --> 00:00:04,500
-            မင်္ဂလာပါ ခင်ဗျာ။ NOVANEX AI Recap မှ ကြိုဆိုပါတယ်။
-
-            2
-            00:00:05,100 --> 00:00:09,000
-            ယနေ့ ဆွေးနွေးမည့် အကြောင်းအရာမှာ နည်းပညာခေတ်သစ်အကြောင်း ဖြစ်ပါသည်။`;
+            const file = fileInput.files[0];
+            const fileName = file.name;
 
             try {
                 let srtContent = "";
 
                 if (state.apiKey) {
-                    srtContent = await callGeminiAPI(promptText);
+                    showToast("ဖိုင်ဒေတာအား AI Subtitle Engine သို့ တင်သွင်းနေပါသည်...");
+                    const base64Data = await fileToBase64(file);
+                    
+                    const mediaPart = {
+                        inlineData: {
+                            data: base64Data.split(',')[1],
+                            mimeType: file.type || "audio/mp3"
+                        }
+                    };
+
+                    const promptText = `ဤတင်သွင်းလိုက်သော အော်ဒီယို/ဗီဒီယိုဖိုင်ထဲမှ စကားပြောသံများကို အပြည့်အဝနားထောင်ပြီး စက္ကန့်အလိုက် တိကျသော မြန်မာဘာသာစကား SRT (SubRip) Subtitle ဖိုင်တစ်ခု ဖန်တီးပေးပါ။ 
+                    timeline သတ်မှတ်ချက်များကို စက္ကန့်အလိုက် အတိအကျခွဲခြားပြီး timeline တစ်ခုချင်းစီတွင် မြန်မာစကားပြောသံများကို သဘာဝကျကျ စာတန်းထိုးပေးပါ။ 
+                    သတိပြုရန်- ၎င်းထွက်ပေါ်လာမည့် စာသားများသည် SRT format မူရင်းအတိုင်းသာ ဖြစ်ရမည်ဖြစ်ပြီး မည်သည့်စကားပလ္လင် သို့မဟုတ် Markdown coding (e.g. \`\`\`srt ) မျှ မပါဝင်စေရပါ။
+                    
+                    SRT format နမူနာပုံစံ-
+                    1
+                    00:00:01,000 --> 00:00:04,500
+                    မင်္ဂလာပါ ခင်ဗျာ။ NOVANEX AI Recap မှ ကြိုဆိုပါတယ်။
+                    
+                    2
+                    00:00:05,100 --> 00:00:09,000
+                    ယနေ့ ဆွေးနွေးမည့် အကြောင်းအရာမှာ နည်းပညာခေတ်သစ်အကြောင်း ဖြစ်ပါသည်။`;
+
+                    srtContent = await callGeminiAPIWithMedia(promptText, mediaPart);
                 } else {
                     await new Promise(resolve => setTimeout(resolve, 3000));
                     srtContent = `1
@@ -1365,6 +1401,9 @@
 00:00:13,800 --> 00:00:18,500
 စနစ်တကျ ဖန်တီးထားသော SRT Subtitle ဖိုင်ကို စိတ်ကြိုက် ပြင်ဆင် ဒေါင်းလုဒ်လုပ်နိုင်ပါသည်။`;
                 }
+
+                // Clean the output from possible markdown code block wraps
+                srtContent = srtContent.replace(/```srt/g, '').replace(/```/g, '').trim();
 
                 const srtTextarea = document.getElementById('srt-textarea');
                 srtTextarea.value = srtContent;
@@ -1411,7 +1450,9 @@
                 return;
             }
 
-            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            // High precision UTF-8 BOM encoding for perfect Burmese text rendering in VLC / Native players
+            const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+            const blob = new Blob([bom, content], { type: 'text/srt;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -1508,7 +1549,7 @@
 
 တစ်နေ့တွင် လိပ်ပြာလေးသည် သူငယ်ချင်းများနှင့်ဝေးရာ အရောင်ပျောက်ဆုံးနေသော တောင်ကုန်းတစ်ခုသို့ ရောက်ရှိသွားသည်။ ထိုတောင်ကုန်းတွင် ပန်းပွင့်လေးများမှာ အရောင်မရှိဘဲ မွဲခြောက်နေကြသည်။ 
 
-* **သင်ခန်းစာ:** သူတစ်ပါးကို ကူညီခြင်းသည် သင့်အားလည်း ပိုမိုတောက်ပသော ပျော်ရွှင်မှုကို ပေးနိုင်သည်။
+* **¼သင်ခန်းစာ:** သူတစ်ပါးကို ကူညီခြင်းသည် သင့်အားလည်း ပိုမိုတောက်ပသော ပျော်ရွှင်မှုကို ပေးနိုင်သည်။
 * **နိဂုံး:** လိပ်ပြာလေး၏ နွေးထွေးသော စေတနာကြောင့် ပန်းပွင့်လေးများ ပြန်လည်စိုပြေလာကာ တောအုပ်တစ်ခုလုံး လှပသွားလေသည်။`;
                         } else if (state.currentTool === 'translate') {
                             responseText = `### 🌐 ဘာသာပြန်ဆိုပြီးသော စာသားများ (Demo Mode)
@@ -1653,6 +1694,7 @@
             };
         }
 
+        // PCM-To-WAV Dynamic Helper
         function extractSampleRate(mimeType) {
             const match = mimeType.match(/rate=(\d+)/);
             return match ? parseInt(match[1], 10) : null;
@@ -1668,6 +1710,7 @@
             return bytes.buffer;
         }
 
+        // L16 PCM stereo/mono converter to WAV
         function convertPCMToWav(pcmBuffer, sampleRate) {
             const buffer = new Uint8Array(pcmBuffer);
             const wavHeader = new ArrayBuffer(44);
@@ -1774,50 +1817,79 @@
         // CORE INTEGRATED GEMINI CHAT CONNECTOR (API)
         // ==============================================
         async function callGeminiAPI(userQuery, systemPrompt = "မင်းက အကူအညီပေးချင်တဲ့ ဆန်းသစ်သော NOVANEX AI Engine ဖြစ်တယ်။") {
-            const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${state.apiKey}`;
-            
-            const payload = {
-                contents: [{
-                    parts: [{ text: userQuery }]
-                }],
-                systemInstruction: {
-                    parts: [{ text: systemPrompt }]
+            return await callGeminiAPIWithMedia(userQuery, null, systemPrompt);
+        }
+
+        // High compatibility Media/Text combined Gemini API executor
+        async function callGeminiAPIWithMedia(userQuery, mediaPart = null, systemPrompt = "မင်းက အကူအညီပေးချင်တဲ့ ဆန်းသစ်သော NOVANEX AI Engine ဖြစ်တယ်။") {
+            const models = ['gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-2.5-flash-preview-09-2025'];
+            let lastError = null;
+
+            for (const model of models) {
+                const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${state.apiKey}`;
+                
+                const parts = [];
+                if (mediaPart) {
+                    parts.push(mediaPart);
                 }
-            };
+                parts.push({ text: userQuery });
 
-            let delay = 1000;
-            for (let attempt = 1; attempt <= 5; attempt++) {
-                try {
-                    const response = await fetch(apiEndpoint, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(payload)
-                    });
+                const payload = {
+                    contents: [{
+                        parts: parts
+                    }],
+                    systemInstruction: {
+                        parts: [{ text: systemPrompt }]
+                    }
+                };
 
-                    if (response.ok) {
-                        const data = await response.json();
-                        const outText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                        if (outText) return outText;
-                        throw new Error("ပြန်လာသော ရလဒ်ထဲတွင် စာသားမတွေ့ရပါ။");
-                    }
-                    
-                    if (response.status === 429 || response.status >= 500) {
-                        await new Promise(resolve => setTimeout(resolve, delay));
-                        delay *= 2;
-                        continue;
-                    }
+                let delay = 1000;
+                let success = false;
+                let responseText = "";
 
-                    throw new Error(`API တုံ့ပြန်မှု ကုဒ်: ${response.status}`);
-                } catch (error) {
-                    if (attempt === 5) {
-                        throw new Error("ကြိုးပမ်းမှု (၅) ကြိမ်လုံး မအောင်မြင်ပါ။ အင်တာနက် သို့မဟုတ် API Key ကို စစ်ဆေးပါ။");
+                for (let attempt = 1; attempt <= 3; attempt++) {
+                    try {
+                        const response = await fetch(apiEndpoint, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                            if (responseText) {
+                                success = true;
+                                return responseText;
+                            }
+                        }
+
+                        if (response.status === 404) {
+                            lastError = new Error(`Model ${model} is not supported by your API key. Trying next fallback...`);
+                            break;
+                        }
+
+                        if (response.status === 400 || response.status === 401 || response.status === 403) {
+                            const errorData = await response.json().catch(() => ({}));
+                            const errMsg = errorData.error?.message || `Google API error: ${response.status}`;
+                            throw new Error(errMsg);
+                        }
+
+                        if (response.status === 429 || response.status >= 500) {
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            delay *= 2;
+                            continue;
+                        }
+                    } catch (error) {
+                        lastError = error;
+                        if (error.message.includes("API key") || error.message.includes("not valid") || error.message.includes("Google API error")) {
+                            throw error;
+                        }
                     }
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    delay *= 2;
                 }
+                if (success) return responseText;
             }
+            throw lastError || new Error("Gemini API calls failed. Please check your network and API Key validity.");
         }
 
         // Copy Clipboard Utility with backup frame execution
